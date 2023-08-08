@@ -13,10 +13,16 @@ libraries:
 commands:
   clans:
     description: Core command of DqnutClans.
-    aliases: [clan, c]
+    aliases: [ clan, c ]
     usage: /<command>
 
 permissions:
+  clans.*:
+    description: Permission to all features of the DqnutClans plugin.
+    default: op
+    children:
+      - 'clans.admin'
+      - 'clans.member'
   clans.admin:
     description: Permission to administrative features of the DqnutClans plugin.
     default: op
@@ -25,6 +31,23 @@ permissions:
       - 'dqnutclans.create'
       - 'dqnutclans.disband'
       - 'dqnutclans.disband.others'
+      - 'dqnutclans.list'
+      - 'dqnutclans.info'
+      - 'dqnutclans.kick'
+      - 'dqnutclans.ban'
+      - 'dqnutclans.invite'
+      - 'dqnutclans.join'
+      - 'dqnutclans.leave'
+      - 'dqnutclans.accept'
+      - 'dqnutclans.deny'
+      - 'dqnutclans.chat'
+  clans.member:
+    description: Permission to regular features of the DqnutClans plugin.
+    default: true
+    children:
+      - 'dqnutclans.help'
+      - 'dqnutclans.create'
+      - 'dqnutclans.disband'
       - 'dqnutclans.list'
       - 'dqnutclans.info'
       - 'dqnutclans.kick'
