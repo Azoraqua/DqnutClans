@@ -72,6 +72,10 @@ public final class ClanManager {
 
     @SneakyThrows
     public void load() {
+        if (!plugin.getClanDatafolder().exists()) {
+            plugin.getClanDatafolder().mkdirs();
+        }
+
         for (File dataFile : Objects.requireNonNull(plugin.getClanDatafolder().listFiles((d, n) -> n.endsWith(".yml")))) {
             final FileConfiguration cfg = YamlConfiguration.loadConfiguration(dataFile);
             final Clan clan = Clan.builder()

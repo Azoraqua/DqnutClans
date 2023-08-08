@@ -11,11 +11,6 @@ import org.bukkit.entity.Player;
 public final class ClanCommand extends CommandBase {
     private final ClanPlugin plugin;
 
-    @Default
-    public void base(CommandSender sender) {
-        help(); // Perhaps implement differently?
-    }
-
     @SubCommand("help")
     @Permission("dqnutclans.help")
     public void help() {
@@ -38,7 +33,7 @@ public final class ClanCommand extends CommandBase {
     @SubCommand("disband")
     @Permission("dqnutclans.disband.others")
     @WrongUsage("§cYou must provide the name of a clan.")
-    public void disbandOthers(CommandSender sender, @CompleteFor("#clans") String name) {
+    public void disbandOthers(CommandSender sender, @Completion("#clans") String name) {
         // TODO: Implement /clan disband <name>
     }
 
@@ -57,28 +52,28 @@ public final class ClanCommand extends CommandBase {
     @SubCommand("kick")
     @Permission("dqnutclans.kick")
     @WrongUsage("§cYou must provide the name of a member.")
-    public void kick(CommandSender sender, @CompleteFor("#players") Player member) {
+    public void kick(CommandSender sender, @Completion("#players") Player member) {
         // TODO: Implement /clan kick <member>
     }
 
     @SubCommand("ban")
     @Permission("dqnutclans.ban")
     @WrongUsage("§cYou must provide the name of a member.")
-    public void ban(CommandSender sender, @CompleteFor("#players") Player member) {
+    public void ban(CommandSender sender, @Completion("#players") Player member) {
         // TODO: Implement /clan ban <member>
     }
 
     @SubCommand("invite")
     @Permission("dqnutclans.invite")
     @WrongUsage("§cYou must provide the name of a player.")
-    public void invite(CommandSender sender, @CompleteFor("#players") Player member) {
+    public void invite(CommandSender sender, @Completion("#players") Player member) {
         // TODO: Implement /clan invite <member>
     }
 
     @SubCommand("join")
     @Permission("dqnutclans.join")
     @WrongUsage("§cYou must provide the name of a clan.")
-    public void join(CommandSender sender, @CompleteFor("#clans") String name) {
+    public void join(CommandSender sender, @Completion("#clans") String name) {
         // TODO: Implement /clan join <name>
     }
 
