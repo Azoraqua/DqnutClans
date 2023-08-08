@@ -8,7 +8,6 @@ libraries:
   - 'me.mattstudios.utils:matt-framework:1.4'
   - 'net.kyori:adventure-api:4.14.0'
   - 'net.kyori:adventure-platform-bukkit:4.3.0'
-  - 'io.papermc:paperlib:1.0.7'
   - 'com.google.guava:guava:32.1.2-jre'
   - 'org.projectlombok:lombok:1.18.28'
 
