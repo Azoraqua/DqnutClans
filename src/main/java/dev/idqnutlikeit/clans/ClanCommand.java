@@ -1,17 +1,15 @@
 package dev.idqnutlikeit.clans;
 
+import lombok.AllArgsConstructor;
 import me.mattstudios.mf.annotations.*;
 import me.mattstudios.mf.base.CommandBase;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+@AllArgsConstructor
 @Command("clans")
 public final class ClanCommand extends CommandBase {
     private final ClanPlugin plugin;
-
-    public ClanCommand(ClanPlugin plugin) {
-        this.plugin = plugin;
-    }
 
     @Default
     public void base(CommandSender sender) {
