@@ -36,7 +36,7 @@ public final class ClanPlugin extends JavaPlugin {
         // Tasks
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             clanManager.get().save();
-        }, 0L, 20L * 10);
+        }, 0L, 20L * getConfig().getLong("auto-save-interval", 30L));
     }
 
     @Override
