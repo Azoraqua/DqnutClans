@@ -11,6 +11,10 @@ import org.bukkit.entity.Player;
 public final class ClanCommand extends CommandBase {
     private final ClanPlugin plugin;
 
+    public ClanCommand(ClanPlugin plugin) {
+        this.plugin = plugin;
+    }
+
     @SubCommand("help")
     @Permission("dqnutclans.help")
     public void help() {
@@ -21,7 +25,25 @@ public final class ClanCommand extends CommandBase {
     @Permission("dqnutclans.create")
     @WrongUsage("§cYou must provide a name for a clan.")
     public void create(CommandSender sender, String name) {
-        // TODO: Implement /clan create <name>
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("Only players can create clans.");
+            return;
+        }
+
+        Player player = (Player) sender;
+
+        ClanManager clanManager = ClanPlugin.getClanManager();
+
+        if (clanManager.getClanByName(name).isPresent()) {
+            player.sendMessage("A clan with that name already exists.");
+            return;
+        }
+
+        Clan clan = clanManager.createClan(name, player);
+
+        player.sendMessage("Clan '" + name + "' has been created.");
+
+        clanManager.save();
     }
 
     @SubCommand("disband")
