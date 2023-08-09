@@ -1,6 +1,7 @@
 package dev.idqnutlikeit.clans.commands;
 
 import com.google.common.base.Suppliers;
+import dev.idqnutlikeit.clans.Clan;
 import dev.idqnutlikeit.clans.ClanPlugin;
 import lombok.AllArgsConstructor;
 import net.kyori.adventure.text.Component;
@@ -8,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 @AllArgsConstructor
@@ -20,7 +22,31 @@ public final class ClanCommandDelegate {
     }
 
     public void create(CommandSender sender, String name) {
-        plugin.getAudience().sender(sender).sendMessage(Component.text("CREATE")); // TODO: Implement /clan create <name>
+        plugin.getAudience().sender(sender).sendMessage(Component.text("CREATE"));
+
+        if (!(sender instanceof Player)) {
+            plugin.getAudience().sender(sender).sendMessage(Component.text("Only players can create clans."));
+            return;
+        }
+
+        Player player = (Player) sender;
+
+        if (plugin.getClanManager().getClanByPlayer(player).isPresent()) {
+            plugin.getAudience().sender(sender).sendMessage(Component.text("You are already a member of a clan. Leave your current clan before creating a new one."));
+            return;
+        }
+
+        Optional<Clan> existingClan = plugin.getClanManager().getClanByName(name);
+
+        if (existingClan.isPresent()) {
+            plugin.getAudience().sender(sender).sendMessage(Component.text("A clan with the name " + name + " already exists."));
+            return;
+        }
+
+        Clan newClan = plugin.getClanManager().createClan(name, player);
+        newClan.addMember(player);
+
+        plugin.getAudience().sender(sender).sendMessage(Component.text("Clan " + name + " has been created with you as the leader."));
     }
 
     public void disband(CommandSender sender) {
