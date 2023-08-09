@@ -27,11 +27,11 @@ public final class ClanPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
-            super.getLogger().warning("Vault found. Hooking into it.");
+            super.getLogger().info("Vault found. Hooking into it.");
         }
 
         if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            super.getLogger().warning("PlaceholderAPI found. Hooking into it.");
+            super.getLogger().info("PlaceholderAPI found. Hooking into it.");
             new ClanPlaceholder(this).register();
         }
 

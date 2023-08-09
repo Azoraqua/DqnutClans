@@ -37,12 +37,6 @@ public final class ClanPlaceholder extends PlaceholderExpansion {
 
     @Override
     public @Nullable String onRequest(OfflinePlayer player, @NotNull String params) {
-        if (params.endsWith("_name")) {
-            return plugin.getClanManager().getClanByPlayer(player)
-                    .map(Clan::getName)
-                    .orElse(null);
-        }
-
         return super.onRequest(player, params);
     }
 }
