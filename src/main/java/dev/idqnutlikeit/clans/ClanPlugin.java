@@ -16,10 +16,7 @@ import java.util.function.Supplier;
 
 public final class ClanPlugin extends JavaPlugin {
     // Constants
-    public static final Gson GSON = new GsonBuilder()
-            .setLenient()
-            .setPrettyPrinting()
-            .create();
+    public static final Gson GSON = new GsonBuilder().setLenient().setPrettyPrinting().create();
     // End of constants.
 
     private final Supplier<BukkitAudiences> audience = Suppliers.memoize(() -> BukkitAudiences.create(this));
@@ -29,6 +26,15 @@ public final class ClanPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
+            super.getLogger().warning("Vault found. Hooking into it.");
+        }
+
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            super.getLogger().warning("PlaceholderAPI found. Hooking into it.");
+            new ClanPlaceholder(this).register();
+        }
+
         super.saveResource("config.yml", false);
         super.saveResource("messages.yml", false);
 

@@ -2,17 +2,22 @@ package dev.idqnutlikeit.clans;
 
 import dev.idqnutlikeit.clans.util.Utils;
 import me.mattstudios.mf.annotations.*;
-import me.mattstudios.mf.annotations.Optional;
 import me.mattstudios.mf.base.CommandBase;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Command("clan")
 @Alias({"clan", "c"})
@@ -72,15 +77,27 @@ public final class ClanCommand extends CommandBase {
     @Permission("dqnutclans.list")
     public void list(CommandSender sender) {
         TextComponent msg = Component.text("Clans: ", NamedTextColor.YELLOW);
-        final List<String> clanNames = new ArrayList<>(clanManager.getClanNames());
+        final List<Clan> clans = new ArrayList<>(clanManager.getClans());
 
-        for (int i = 0; i < clanNames.size(); i++) {
-            final String clanName = clanNames.get(i);
+        for (int i = 0; i < clans.size(); i++) {
+            final Clan clan = clans.get(i);
 
-            msg = msg.append(Component.text(clanName, NamedTextColor.WHITE)
-                    .clickEvent(ClickEvent.runCommand("/clan info " + clanName)));
+            TextComponent.Builder clanComponent = Component.text();
+            clanComponent.append(Component.text(clan.getName(), NamedTextColor.GRAY));
+            clanComponent.clickEvent(ClickEvent.runCommand("/clan info " + clan.getName()));
+            clanComponent.hoverEvent(HoverEvent.showText(
+                    Component.text()
+                            .append(Component.text("§eLeader: §7" + clan.getLeader().getName()))
+                            .appendNewline()
+                            .append(Component.text("§eMembers: §7" + clan.getMembers()
+                                    .stream()
+                                    .map(OfflinePlayer::getName)
+                                    .collect(Collectors.joining("§f,§7 "))))
+            ));
 
-            if ((i + 1) < clanNames.size()) {
+            msg = msg.append(clanComponent.build());
+
+            if ((i + 1) < clans.size()) {
                 msg = msg.append(Component.text(", ", NamedTextColor.BLUE));
             }
         }
