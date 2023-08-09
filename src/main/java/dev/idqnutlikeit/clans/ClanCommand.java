@@ -2,16 +2,20 @@ package dev.idqnutlikeit.clans;
 
 import dev.idqnutlikeit.clans.util.Utils;
 import me.mattstudios.mf.annotations.*;
+import me.mattstudios.mf.annotations.Optional;
 import me.mattstudios.mf.base.CommandBase;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Command("clan")
-@Alias({ "clan", "c" })
+@Alias({"clan", "c"})
 public final class ClanCommand extends CommandBase {
 
     private final ClanManager clanManager;
@@ -29,21 +33,14 @@ public final class ClanCommand extends CommandBase {
     @SubCommand("create")
     @Permission("dqnutclans.create")
     @WrongUsage("§cYou must provide a name for a clan.")
-    public void create(CommandSender sender, String name) {
-        if(!(sender instanceof Player)) {
+    public void create(CommandSender sender, @NotNull String name) {
+        if (!(sender instanceof Player leader)) {
             Utils.sendMessage(sender, Component.text("Only players can create clans."));
             return;
         }
 
-        Player leader = (Player) sender;
-
-        if (clanManager.getClanByPlayer(leader).isPresent()) {
+        if (clanManager.hasClan(leader)) {
             Utils.sendMessage(sender, Component.text("You are already in a clan."));
-            return;
-        }
-
-        if (name == null || name.isEmpty()) {
-            Utils.sendMessage(sender, Component.text("You must provide a name for the clan."));
             return;
         }
 
@@ -51,11 +48,11 @@ public final class ClanCommand extends CommandBase {
             Utils.sendMessage(sender, Component.text("A clan with that name already exists."));
             return;
         }
-        clanManager.createClan(name, leader);
-        Utils.sendMessage(sender, Component.text("Clan " + name + " created with you as the leader."));
 
+        Clan clan = clanManager.createClan(name, leader);
         clanManager.save();
 
+        Utils.sendMessage(sender, Component.text("Clan " + clan.getName() + " created with you as the leader."));
     }
 
     @SubCommand("disband")
@@ -74,7 +71,21 @@ public final class ClanCommand extends CommandBase {
     @SubCommand("list")
     @Permission("dqnutclans.list")
     public void list(CommandSender sender) {
-        // TODO: Implement.
+        TextComponent msg = Component.text("Clans: ", NamedTextColor.YELLOW);
+        final List<String> clanNames = new ArrayList<>(clanManager.getClanNames());
+
+        for (int i = 0; i < clanNames.size(); i++) {
+            final String clanName = clanNames.get(i);
+
+            msg = msg.append(Component.text(clanName, NamedTextColor.WHITE)
+                    .clickEvent(ClickEvent.runCommand("/clan info " + clanName)));
+
+            if ((i + 1) < clanNames.size()) {
+                msg = msg.append(Component.text(", ", NamedTextColor.BLUE));
+            }
+        }
+
+        Utils.sendMessage(sender, msg);
     }
 
     @SubCommand("info")

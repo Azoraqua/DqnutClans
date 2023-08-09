@@ -1,15 +1,15 @@
 package dev.idqnutlikeit.clans;
 
+import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,11 +20,7 @@ public final class ClanManager {
     private final Set<Clan> clans = Collections.synchronizedSet(new HashSet<>());
 
     public Clan createClan(String name, Player leader) {
-        final Clan clan = Clan.builder()
-                .id(UUID.randomUUID())
-                .name(name)
-                .leader(leader)
-                .build();
+        final Clan clan = new Clan.Builder(name, leader).build();
 
         clans.add(clan);
         return clan;
@@ -52,23 +48,30 @@ public final class ClanManager {
         return clans.stream().filter(c -> c.getLeader().equals(player) || c.getMembers().contains(player)).findFirst();
     }
 
+    public boolean hasClan(String name) {
+        return getClanByName(name).isPresent();
+    }
+
+    public boolean hasClan(OfflinePlayer player) {
+        return getClanByPlayer(player).isPresent();
+    }
+
     @SneakyThrows
     public void save() {
         for (Clan c : clans) {
-            final File dataFile = new File(plugin.getClanDatafolder(), c.getId().toString() + ".yml");
+            final File dataFile = new File(plugin.getClanDatafolder(), c.getId().toString() + ".json");
 
             if (!dataFile.exists()) {
                 dataFile.createNewFile();
             }
 
-            final FileConfiguration cfg = YamlConfiguration.loadConfiguration(dataFile);
-            cfg.set("name", c.getName());
-            cfg.set("leader", c.getLeader().getUniqueId());
-            cfg.set("members", c.getMembers().stream().map(OfflinePlayer::getUniqueId).collect(Collectors.toSet()));
-            cfg.set("spawnpoint", c.getSpawnpoint());
-            cfg.save(dataFile);
-
-            plugin.getLogger().info("Saved clan: " + c);
+            try (FileWriter w = new FileWriter(dataFile)) {
+                ClanPlugin.GSON.toJson(c.toJson(), w);
+                plugin.getLogger().info("Saved clan: " + c.toJson());
+            } catch (IOException ex) {
+                plugin.getLogger().severe("Failed to save clan (" + c.getId() + "):");
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -78,27 +81,27 @@ public final class ClanManager {
             plugin.getClanDatafolder().mkdirs();
         }
 
-        for (File dataFile : Objects.requireNonNull(plugin.getClanDatafolder().listFiles((d, n) -> n.endsWith(".yml")))) {
+        for (File dataFile : Objects.requireNonNull(plugin.getClanDatafolder().listFiles((d, n) -> n.endsWith(".json")))) {
             if (dataFile.length() == 0) {
                 continue;
             }
 
-            final FileConfiguration cfg = YamlConfiguration.loadConfiguration(dataFile);
+            try (FileReader r = new FileReader(dataFile)) {
+                final Clan clan = Clan.fromJson(ClanPlugin.GSON.fromJson(r, JsonObject.class));
 
-            final Clan clan = Clan.builder()
-                    .id(UUID.fromString(dataFile.getName().replace(".yml", "")))
-                    .name(cfg.getString("name"))
-                    .leader(Bukkit.getOfflinePlayer(UUID.fromString(Objects.requireNonNull(cfg.getString("leader")))))
-                    .spawnpoint(cfg.getSerializable("spawnpoint", Location.class))
-                    .build();
+                if (clans.contains(clan)) {
+                    // Replacing the clan.
+                    clans.remove(clan);
+                    clans.add(clan);
+                } else {
+                    clans.add(clan);
+                }
 
-            for (String memberIdStr : Objects.requireNonNull(cfg.getStringList("members"))) {
-                final UUID memberId = UUID.fromString(memberIdStr);
-
-                clan.addMember(Bukkit.getOfflinePlayer(memberId));
+                plugin.getLogger().info("Loaded clan: " + clan.toJson());
+            } catch (IOException ex) {
+                plugin.getLogger().severe("Failed to load clan (" + dataFile.getName().replace(".json", "") + "):");
+                ex.printStackTrace();
             }
-
-            plugin.getLogger().info("Loaded clan: " + clan);
         }
     }
 }
