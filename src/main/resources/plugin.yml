@@ -2,7 +2,8 @@ name: '${artifactId}'
 version: '${version}'
 main: dev.idqnutlikeit.clans.ClanPlugin
 api-version: '1.20'
-softdepend: [PlaceholderAPI, Vault]
+authors: [ IDqnutLikeIt, Azoraqua ]
+softdepend: [ PlaceholderAPI, Vault ]
 
 libraries:
   - 'me.mattstudios.utils:matt-framework:1.4'
@@ -28,7 +29,6 @@ permissions:
     description: Permission to administrative features of the DqnutClans plugin.
     default: op
     children:
-      - 'dqnutclans.help'
       - 'dqnutclans.create'
       - 'dqnutclans.disband'
       - 'dqnutclans.disband.others'
@@ -46,7 +46,6 @@ permissions:
     description: Permission to regular features of the DqnutClans plugin.
     default: true
     children:
-      - 'dqnutclans.help'
       - 'dqnutclans.create'
       - 'dqnutclans.disband'
       - 'dqnutclans.list'

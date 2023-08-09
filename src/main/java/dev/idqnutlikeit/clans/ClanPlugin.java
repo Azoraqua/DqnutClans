@@ -1,13 +1,17 @@
 package dev.idqnutlikeit.clans;
 
 import com.google.common.base.Suppliers;
+import dev.idqnutlikeit.clans.commands.CCommand;
+import dev.idqnutlikeit.clans.commands.ClanCommand;
+import dev.idqnutlikeit.clans.commands.ClansCommand;
+import dev.idqnutlikeit.clans.resolvers.parameter.ParameterResolvers;
 import me.mattstudios.mf.base.CommandManager;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.function.Supplier;
 
 public final class ClanPlugin extends JavaPlugin {
@@ -20,23 +24,22 @@ public final class ClanPlugin extends JavaPlugin {
     public void onEnable() {
         super.saveResource("config.yml", false);
         super.saveResource("messages.yml", false);
+
+        commandManager.get().register(new ClansCommand(), new ClanCommand(), new CCommand());
+
+        // Completion for commands.
+//        commandManager.get().getCompletionHandler().register("#clans", CompletionResolvers.clan(this));
+
+        // Parameters for commands.
+        commandManager.get().getParameterHandler().register(OfflinePlayer.class, ParameterResolvers.offlinePlayer(this));
+        commandManager.get().getParameterHandler().register(Clan.class, ParameterResolvers.clan(this));
+
         clanManager.get().load();
-
-        // Useless code but funny - Dqnut :D
-
-        System.out.println("Welcome by DqnutClans");
-        System.out.println("Thanks for using our plugin");
-
-
-        commandManager.get().register(new ClanCommand(this));
-
-        // Placeholders for completions.
-        commandManager.get().getCompletionHandler().register("#clans", input -> new ArrayList<>(clanManager.get().getClanNames()));
 
         // Tasks
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             clanManager.get().save();
-        }, 0L, 20L * getConfig().getLong("auto-save-interval", 30L));
+        }, 20L * 10L, 20L * getConfig().getLong("auto-save-interval", 30L));
     }
 
     @Override

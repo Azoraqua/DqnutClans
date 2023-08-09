@@ -1,103 +1,98 @@
-package dev.idqnutlikeit.clans;
+package dev.idqnutlikeit.clans.commands;
 
-import lombok.AllArgsConstructor;
 import me.mattstudios.mf.annotations.*;
 import me.mattstudios.mf.base.CommandBase;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-@AllArgsConstructor
-@Command("clans")
+@Command("clan")
 public final class ClanCommand extends CommandBase {
-    private final ClanPlugin plugin;
-
-    @SubCommand("help")
-    @Permission("dqnutclans.help")
-    public void help() {
-        // TODO: Implement /clan help
+    @Default
+    public void help(CommandSender sender) {
+        ClanCommandDelegate.instance.get().help(sender);
     }
 
     @SubCommand("create")
     @Permission("dqnutclans.create")
     @WrongUsage("§cYou must provide a name for a clan.")
     public void create(CommandSender sender, String name) {
-        // TODO: Implement /clan create <name>
+        ClanCommandDelegate.instance.get().create(sender, name);
     }
 
     @SubCommand("disband")
     @Permission({"dqnutclans.disband"})
     public void disband(CommandSender sender) {
-        // TODO: Implement /clan disband
+        ClanCommandDelegate.instance.get().disband(sender);
     }
 
     @SubCommand("disband")
     @Permission("dqnutclans.disband.others")
     @WrongUsage("§cYou must provide the name of a clan.")
-    public void disbandOthers(CommandSender sender, @Completion("#clans") String name) {
-        // TODO: Implement /clan disband <name>
+    public void disbandOthers(CommandSender sender, String name) {
+        ClanCommandDelegate.instance.get().disbandOthers(sender, name);
     }
 
     @SubCommand("list")
     @Permission("dqnutclans.list")
     public void list(CommandSender sender) {
-        // TODO: Implement /clan list
+        ClanCommandDelegate.instance.get().list(sender);
     }
 
     @SubCommand("info")
     @Permission("dqnutclans.info")
     public void info(CommandSender sender) {
-        // TODO: Implement /clan info
+        ClanCommandDelegate.instance.get().info(sender);
     }
 
     @SubCommand("kick")
     @Permission("dqnutclans.kick")
     @WrongUsage("§cYou must provide the name of a member.")
     public void kick(CommandSender sender, @Completion("#players") Player member) {
-        // TODO: Implement /clan kick <member>
+        ClanCommandDelegate.instance.get().kick(sender, member);
     }
 
     @SubCommand("ban")
     @Permission("dqnutclans.ban")
     @WrongUsage("§cYou must provide the name of a member.")
     public void ban(CommandSender sender, @Completion("#players") Player member) {
-        // TODO: Implement /clan ban <member>
+        ClanCommandDelegate.instance.get().ban(sender, member);
     }
 
     @SubCommand("invite")
     @Permission("dqnutclans.invite")
     @WrongUsage("§cYou must provide the name of a player.")
     public void invite(CommandSender sender, @Completion("#players") Player member) {
-        // TODO: Implement /clan invite <member>
+        ClanCommandDelegate.instance.get().invite(sender, member);
     }
 
     @SubCommand("join")
     @Permission("dqnutclans.join")
     @WrongUsage("§cYou must provide the name of a clan.")
-    public void join(CommandSender sender, @Completion("#clans") String name) {
-        // TODO: Implement /clan join <name>
+    public void join(CommandSender sender, String name) {
+        ClanCommandDelegate.instance.get().join(sender, name);
     }
 
     @SubCommand("leave")
     @Permission("dqnutclans.leave")
     public void leave(CommandSender sender) {
-        // TODO: Implement /clan leave
+        ClanCommandDelegate.instance.get().leave(sender);
     }
 
     @SubCommand("accept")
     @Permission("dqnutclans.accept")
     public void accept(CommandSender sender) {
-        // TODO: Implement /clan accept
+        ClanCommandDelegate.instance.get().accept(sender);
     }
 
     @SubCommand("deny")
     @Permission("dqnutclans.deny")
     public void deny(CommandSender sender) {
-        // TODO: Implement /clan deny
+        ClanCommandDelegate.instance.get().deny(sender);
     }
 
     @SubCommand("chat")
     @Permission("dqnutclans.chat")
     public void chat(CommandSender sender, @Optional String message) {
-        // TODO: Implement /clan chat [message]
+        ClanCommandDelegate.instance.get().chat(sender, message);
     }
 }
