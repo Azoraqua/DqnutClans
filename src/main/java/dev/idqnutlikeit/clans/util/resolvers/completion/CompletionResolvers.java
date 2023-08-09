@@ -1,4 +1,4 @@
-package dev.idqnutlikeit.clans.resolvers.completion;
+package dev.idqnutlikeit.clans.util.resolvers.completion;
 
 import dev.idqnutlikeit.clans.ClanPlugin;
 

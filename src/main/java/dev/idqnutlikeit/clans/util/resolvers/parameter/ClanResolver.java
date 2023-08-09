@@ -1,4 +1,4 @@
-package dev.idqnutlikeit.clans.resolvers.parameter;
+package dev.idqnutlikeit.clans.util.resolvers.parameter;
 
 import dev.idqnutlikeit.clans.ClanPlugin;
 import lombok.AllArgsConstructor;

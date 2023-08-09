@@ -67,6 +67,8 @@ public final class ClanManager {
             cfg.set("members", c.getMembers().stream().map(OfflinePlayer::getUniqueId).collect(Collectors.toSet()));
             cfg.set("spawnpoint", c.getSpawnpoint());
             cfg.save(dataFile);
+
+            plugin.getLogger().info("Saved clan: " + c);
         }
     }
 
@@ -77,7 +79,12 @@ public final class ClanManager {
         }
 
         for (File dataFile : Objects.requireNonNull(plugin.getClanDatafolder().listFiles((d, n) -> n.endsWith(".yml")))) {
+            if (dataFile.length() == 0) {
+                continue;
+            }
+
             final FileConfiguration cfg = YamlConfiguration.loadConfiguration(dataFile);
+
             final Clan clan = Clan.builder()
                     .id(UUID.fromString(dataFile.getName().replace(".yml", "")))
                     .name(cfg.getString("name"))
@@ -90,6 +97,8 @@ public final class ClanManager {
 
                 clan.addMember(Bukkit.getOfflinePlayer(memberId));
             }
+
+            plugin.getLogger().info("Loaded clan: " + clan);
         }
     }
 }
