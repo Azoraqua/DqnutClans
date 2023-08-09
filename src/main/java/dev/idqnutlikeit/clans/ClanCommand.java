@@ -1,13 +1,26 @@
 package dev.idqnutlikeit.clans;
 
+import dev.idqnutlikeit.clans.util.Utils;
 import me.mattstudios.mf.annotations.*;
 import me.mattstudios.mf.base.CommandBase;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Command("clan")
 @Alias({ "clan", "c" })
 public final class ClanCommand extends CommandBase {
+
+    private final ClanManager clanManager;
+    private final Map<Player, Long> disbandConfirmations = new HashMap<>();
+
+    public ClanCommand(ClanManager clanManager) {
+        this.clanManager = clanManager;
+    }
+
     @Default
     public void help(CommandSender sender) {
         // TODO: Implement.
@@ -17,7 +30,32 @@ public final class ClanCommand extends CommandBase {
     @Permission("dqnutclans.create")
     @WrongUsage("§cYou must provide a name for a clan.")
     public void create(CommandSender sender, String name) {
-        // TODO: Implement.
+        if(!(sender instanceof Player)) {
+            Utils.sendMessage(sender, Component.text("Only players can create clans."));
+            return;
+        }
+
+        Player leader = (Player) sender;
+
+        if (clanManager.getClanByPlayer(leader).isPresent()) {
+            Utils.sendMessage(sender, Component.text("You are already in a clan."));
+            return;
+        }
+
+        if (name == null || name.isEmpty()) {
+            Utils.sendMessage(sender, Component.text("You must provide a name for the clan."));
+            return;
+        }
+
+        if (clanManager.getClanByName(name).isPresent()) {
+            Utils.sendMessage(sender, Component.text("A clan with that name already exists."));
+            return;
+        }
+        clanManager.createClan(name, leader);
+        Utils.sendMessage(sender, Component.text("Clan " + name + " created with you as the leader."));
+
+        clanManager.save();
+
     }
 
     @SubCommand("disband")

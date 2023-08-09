@@ -32,7 +32,7 @@ public final class ClanPlugin extends JavaPlugin {
         super.saveResource("config.yml", false);
         super.saveResource("messages.yml", false);
 
-        commandManager.get().register(new ClanCommand());
+        commandManager.get().register(new ClanCommand(clanManager.get()));
 
         // Completion for commands.
 //        commandManager.get().getCompletionHandler().register("#clans", CompletionResolvers.clan(this));
