@@ -72,7 +72,11 @@ public class Clan {
         invitations.put(player, Instant.now());
     }
 
-    public boolean isInvited(OfflinePlayer player) {
+    public void removeInvitation(OfflinePlayer player) {
+        invitations.invalidate(player);
+    }
+
+    public boolean hasInvitation(OfflinePlayer player) {
         return invitations.asMap().containsKey(player);
     }
 
