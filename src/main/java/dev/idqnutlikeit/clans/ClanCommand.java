@@ -371,7 +371,7 @@ public final class ClanCommand extends CommandBase {
         }
 
         final Clan clan = optionalClan.get();
-        final Collection<OfflinePlayer> invitations = clan.getInvIk Latitations();
+        final Collection<OfflinePlayer> invitations = clan.getInvitations();
 
         Utils.sendMessage(sender, Component.text("§eInvited: §7" + invitations.stream()
                 .map(OfflinePlayer::getName)
