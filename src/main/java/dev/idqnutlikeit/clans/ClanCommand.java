@@ -54,7 +54,7 @@ public final class ClanCommand extends CommandBase {
                         .appendNewline()
                         .append(Component.text("Create §b<name>§e").clickEvent(ClickEvent.suggestCommand("/clans create")))
                         .appendNewline()
-                        .append(Component.text("Disband §c[clan]§e").clickEvent(ClickEvent.suggestCommand("/clans disband")))
+                        .append(Component.text("Disband§e").clickEvent(ClickEvent.suggestCommand("/clans disband")))
                         .appendNewline()
                         .append(Component.text("List").clickEvent(ClickEvent.suggestCommand("/clans list")))
                         .appendNewline()
@@ -106,44 +106,34 @@ public final class ClanCommand extends CommandBase {
     }
 
     @SubCommand("disband")
-    @Permission({"dqnutclans.disband", "dqnutclans.disband.others"})
-    public void disband(CommandSender sender, @Completion("#clans") @Optional @Nullable Clan clan) {
+    @Permission("dqnutclans.disband")
+    public void disband(CommandSender sender) {
         if (!(sender instanceof Player leader)) {
             Utils.sendMessage(sender, "Only players can disband clans.");
             return;
         }
 
-        if (clan != null) { // Disband other's clan
-            if (!sender.hasPermission("dqnutclans.disband.others")) {
-                Utils.sendMessage(sender, "§cYou do not have permission to disband other player's clans.");
-                return;
-            }
-
-            clanManager.disbandClan(clan);
-            Utils.sendMessage(sender, "§aClan '" + clan.getName() + "' has been disbanded.");
-        } else { // Disband own clan
-            if (!sender.hasPermission("dqnutclans.disband")) {
-                Utils.sendMessage(sender, "§cYou do not have permission to disband your clan.");
-                return;
-            }
-
-            final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(leader);
-
-            if (optionalClan.isEmpty()) {
-                Utils.sendMessage(sender, "§cYou are not in any clan.");
-                return;
-            }
-
-            final Clan ownClan = optionalClan.get();
-
-            if (!ownClan.getLeader().equals(leader)) {
-                Utils.sendMessage(sender, "§cYou are not the leader of this clan.");
-                return;
-            }
-
-            clanManager.disbandClan(ownClan);
-            Utils.sendMessage(sender, "§aYour clan has been disbanded.");
+        if (!sender.hasPermission("dqnutclans.disband")) {
+            Utils.sendMessage(sender, "§cYou do not have permission to disband your clan.");
+            return;
         }
+
+        final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(leader);
+
+        if (optionalClan.isEmpty()) {
+            Utils.sendMessage(sender, "§cYou are not in a clan.");
+            return;
+        }
+
+        final Clan ownClan = optionalClan.get();
+
+        if (!ownClan.getLeader().equals(leader)) {
+            Utils.sendMessage(sender, "§cYou are not the leader of this clan.");
+            return;
+        }
+
+        clanManager.disbandClan(ownClan);
+        Utils.sendMessage(sender, "§aYour clan has been disbanded.");
     }
 
     @SubCommand("list")
@@ -214,6 +204,16 @@ public final class ClanCommand extends CommandBase {
 
             Info.show(player, optionalClan.get());
         } else { // Other clan.
+            if (!sender.hasPermission("dqnutclans.info.others")) {
+                Utils.sendMessage(sender, "§cYou do not have permission to view information about other clans.");
+                return;
+            }
+
+            if (!clanManager.hasClan(clan)) {
+                Utils.sendMessage(sender, "§cThe specified clan does not exist.");
+                return;
+            }
+
             Info.show(sender, clan);
         }
     }
@@ -317,8 +317,13 @@ public final class ClanCommand extends CommandBase {
     @SubCommand("join")
     @Permission("dqnutclans.join")
     @WrongUsage("§cYou must provide the name of a clan.")
-    public void join(CommandSender sender, @Completion("#clans") Clan clan) {
-        // TODO: Implement.
+    public void join(CommandSender sender, @Completion("#clans") @NotNull Clan clan) {
+        if (!clanManager.hasClan(clan)) {
+            Utils.sendMessage(sender, "§cThe specified clan does not exist.");
+            return;
+        }
+
+        Utils.sendMessage(sender, "§eAttempted to join " + clan.getName()); // TODO: Implement.
     }
 
     @SubCommand("leave")
@@ -341,25 +346,38 @@ public final class ClanCommand extends CommandBase {
 
     @SubCommand("invites")
     @Permission("dqnutclans.invites")
-    public void invites(CommandSender sender) {
-        if (!(sender instanceof Player player)) {
-            Utils.sendMessage(sender, Component.text("§cOnly players can see the invites of their own clan."));
-            return;
+    public void invites(CommandSender sender, @Optional @Nullable Clan otherClan) {
+        if (otherClan == null) {
+            if (!(sender instanceof Player player)) {
+                Utils.sendMessage(sender, Component.text("§cOnly players can see the invites of their own clan."));
+                return;
+            }
+
+            final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(player);
+
+            if (optionalClan.isEmpty()) {
+                Utils.sendMessage(sender, Component.text("§cYou are not in a clan."));
+                return;
+            }
+
+            final Clan clan = optionalClan.get();
+            final Collection<OfflinePlayer> invitations = clan.getInvitations();
+
+            Utils.sendMessage(sender, Component.text("§eInvited: §7" + invitations.stream()
+                    .map(OfflinePlayer::getName)
+                    .collect(Collectors.joining("§f,§7 "))));
+        } else {
+            if (!clanManager.hasClan(otherClan)) {
+                Utils.sendMessage(sender, "§cThe specified clan does not exist.");
+                return;
+            }
+
+            final Collection<OfflinePlayer> invitations = otherClan.getInvitations();
+
+            Utils.sendMessage(sender, Component.text("§eInvited: §7" + invitations.stream()
+                    .map(OfflinePlayer::getName)
+                    .collect(Collectors.joining("§f,§7 "))));
         }
-
-        final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(player);
-
-        if (optionalClan.isEmpty()) {
-            Utils.sendMessage(sender, Component.text("§cYou are not in a clan."));
-            return;
-        }
-
-        final Clan clan = optionalClan.get();
-        final Collection<OfflinePlayer> invitations = clan.getInvitations();
-
-        Utils.sendMessage(sender, Component.text("§eInvited: §7" + invitations.stream()
-                .map(OfflinePlayer::getName)
-                .collect(Collectors.joining("§f,§7 "))));
     }
 
     @SubCommand("chat")

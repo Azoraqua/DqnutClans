@@ -32,9 +32,9 @@ permissions:
     children:
       - 'dqnutclans.create'
       - 'dqnutclans.disband'
-      - 'dqnutclans.disband.others'
       - 'dqnutclans.list'
       - 'dqnutclans.info'
+      - 'dqnutclans.info.others'
       - 'dqnutclans.kick'
       - 'dqnutclans.ban'
       - 'dqnutclans.invite'
@@ -43,6 +43,7 @@ permissions:
       - 'dqnutclans.accept'
       - 'dqnutclans.deny'
       - 'dqnutclans.invites'
+      - 'dqnutclans.invites.others'
       - 'dqnutclans.chat'
   clans.member:
     description: Permission to regular features of the DqnutClans plugin.

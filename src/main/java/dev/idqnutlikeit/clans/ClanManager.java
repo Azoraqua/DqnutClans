@@ -48,6 +48,10 @@ public final class ClanManager {
         return clans.stream().filter(c -> c.getLeader().equals(player) || c.getMembers().contains(player)).findFirst();
     }
 
+    public boolean hasClan(Clan clan) {
+        return clans.contains(clan);
+    }
+
     public boolean hasClan(String name) {
         return getClanByName(name).isPresent();
     }

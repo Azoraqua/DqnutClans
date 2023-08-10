@@ -13,6 +13,6 @@ public final class ClanResolver implements ParameterResolver {
     public TypeResult resolve(Object argument) {
         return plugin.getClanManager().getClanByName(String.valueOf(argument))
                 .map((c) -> new TypeResult(c, argument))
-                .orElseGet(() -> new TypeResult(argument));
+                .orElseGet(() -> new TypeResult(null, argument));
     }
 }
