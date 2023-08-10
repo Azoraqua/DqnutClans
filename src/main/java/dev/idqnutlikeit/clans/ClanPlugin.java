@@ -36,19 +36,25 @@ public final class ClanPlugin extends JavaPlugin {
             new ClanPlaceholder(this).register();
         }
 
-        super.saveResource("config.yml", false);
-        super.saveResource("messages.yml", false);
+        {
+            super.saveResource("config.yml", false);
+            super.saveResource("messages.yml", false);
+        }
 
-        commandManager.get().register(new ClanCommand(clanManager.get()));
+        {
+            // Completion for commands.
+            commandManager.get().getCompletionHandler().register("#clans", CompletionResolvers.clan(this));
 
-        // Completion for commands.
-        commandManager.get().getCompletionHandler().register("#clans", CompletionResolvers.clan(this));
+            // Parameters for commands.
+            commandManager.get().getParameterHandler().register(OfflinePlayer.class, ParameterResolvers.offlinePlayer(this));
+            commandManager.get().getParameterHandler().register(Clan.class, ParameterResolvers.clan(this));
 
-        // Parameters for commands.
-        commandManager.get().getParameterHandler().register(OfflinePlayer.class, ParameterResolvers.offlinePlayer(this));
-        commandManager.get().getParameterHandler().register(Clan.class, ParameterResolvers.clan(this));
+            commandManager.get().register(new ClanCommand(clanManager.get()));
+        }
 
-        clanManager.get().load();
+        {
+            clanManager.get().load();
+        }
 
         // Tasks
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {

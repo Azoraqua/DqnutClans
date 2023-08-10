@@ -107,26 +107,17 @@ public final class ClanCommand extends CommandBase {
 
     @SubCommand("disband")
     @Permission({"dqnutclans.disband", "dqnutclans.disband.others"})
-    public void disband(CommandSender sender, @Optional @Nullable String name) {
+    public void disband(CommandSender sender, @Completion("#clans") @Optional @Nullable Clan clan) {
         if (!(sender instanceof Player leader)) {
             Utils.sendMessage(sender, "Only players can disband clans.");
             return;
         }
 
-        if (name != null) { // Disband other's clan
+        if (clan != null) { // Disband other's clan
             if (!sender.hasPermission("dqnutclans.disband.others")) {
                 Utils.sendMessage(sender, "§cYou do not have permission to disband other player's clans.");
                 return;
             }
-
-            final java.util.Optional<Clan> optionalClan = clanManager.getClanByName(name);
-
-            if (optionalClan.isEmpty()) {
-                Utils.sendMessage(sender, "§cThe specified clan does not exist.");
-                return;
-            }
-
-            final Clan clan = optionalClan.get();
 
             clanManager.disbandClan(clan);
             Utils.sendMessage(sender, "§aClan '" + clan.getName() + "' has been disbanded.");
@@ -143,14 +134,14 @@ public final class ClanCommand extends CommandBase {
                 return;
             }
 
-            final Clan clan = optionalClan.get();
+            final Clan ownClan = optionalClan.get();
 
-            if (!clan.getLeader().equals(leader)) {
+            if (!ownClan.getLeader().equals(leader)) {
                 Utils.sendMessage(sender, "§cYou are not the leader of this clan.");
                 return;
             }
 
-            clanManager.disbandClan(clan);
+            clanManager.disbandClan(ownClan);
             Utils.sendMessage(sender, "§aYour clan has been disbanded.");
         }
     }
@@ -195,7 +186,7 @@ public final class ClanCommand extends CommandBase {
 
     @SubCommand("info")
     @Permission("dqnutclans.info")
-    public void info(CommandSender sender, @Optional @Nullable String clanName) {
+    public void info(CommandSender sender, @Completion("#clans") @Optional @Nullable Clan clan) {
         class Info {
             static void show(CommandSender s, Clan clan) {
                 Utils.sendMessage(s, Component.text()
@@ -208,7 +199,7 @@ public final class ClanCommand extends CommandBase {
             }
         }
 
-        if (clanName == null) { // Own clan.
+        if (clan == null) { // Own clan.
             if (!(sender instanceof Player player)) {
                 Utils.sendMessage(sender, "§cOnly players can use this command.");
                 return;
@@ -223,14 +214,7 @@ public final class ClanCommand extends CommandBase {
 
             Info.show(player, optionalClan.get());
         } else { // Other clan.
-            final java.util.Optional<Clan> optionalClan = clanManager.getClanByName(clanName);
-
-            if (optionalClan.isEmpty()) {
-                Utils.sendMessage(sender, "§cThe specified clan does not exist.");
-                return;
-            }
-
-            Info.show(sender, optionalClan.get());
+            Info.show(sender, clan);
         }
     }
 
@@ -333,7 +317,7 @@ public final class ClanCommand extends CommandBase {
     @SubCommand("join")
     @Permission("dqnutclans.join")
     @WrongUsage("§cYou must provide the name of a clan.")
-    public void join(CommandSender sender, String name) {
+    public void join(CommandSender sender, @Completion("#clans") Clan clan) {
         // TODO: Implement.
     }
 
