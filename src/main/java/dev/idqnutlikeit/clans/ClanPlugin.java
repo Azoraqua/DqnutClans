@@ -3,6 +3,7 @@ package dev.idqnutlikeit.clans;
 import com.google.common.base.Suppliers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dev.idqnutlikeit.clans.util.resolvers.completion.CompletionResolvers;
 import dev.idqnutlikeit.clans.util.resolvers.parameter.ParameterResolvers;
 import me.mattstudios.mf.base.CommandManager;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -16,10 +17,7 @@ import java.util.function.Supplier;
 
 public final class ClanPlugin extends JavaPlugin {
     // Constants
-    public static final Gson GSON = new GsonBuilder()
-            .setLenient()
-            .setPrettyPrinting()
-            .create();
+    public static final Gson GSON = new GsonBuilder().setLenient().setPrettyPrinting().create();
     // End of constants.
 
     private final Supplier<BukkitAudiences> audience = Suppliers.memoize(() -> BukkitAudiences.create(this));
@@ -29,13 +27,22 @@ public final class ClanPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
+            super.getLogger().info("Vault found. Hooking into it.");
+        }
+
+        if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            super.getLogger().info("PlaceholderAPI found. Hooking into it.");
+            new ClanPlaceholder(this).register();
+        }
+
         super.saveResource("config.yml", false);
         super.saveResource("messages.yml", false);
 
         commandManager.get().register(new ClanCommand(clanManager.get()));
 
         // Completion for commands.
-//        commandManager.get().getCompletionHandler().register("#clans", CompletionResolvers.clan(this));
+        commandManager.get().getCompletionHandler().register("#clans", CompletionResolvers.clan(this));
 
         // Parameters for commands.
         commandManager.get().getParameterHandler().register(OfflinePlayer.class, ParameterResolvers.offlinePlayer(this));

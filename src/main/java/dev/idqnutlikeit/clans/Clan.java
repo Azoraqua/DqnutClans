@@ -1,5 +1,7 @@
 package dev.idqnutlikeit.clans;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.idqnutlikeit.clans.util.Utils;
@@ -10,23 +12,39 @@ import lombok.ToString;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Getter
 @Setter
 @EqualsAndHashCode
 @ToString
 public class Clan {
+    @NotNull
     private final UUID id;
+    @NotNull
     private final String name;
+    @NotNull
     private final OfflinePlayer leader;
+    @NotNull
     private final Set<OfflinePlayer> members;
+    @Nullable
     private Location spawnpoint;
 
-    public Clan(UUID id, String name, OfflinePlayer leader, Set<OfflinePlayer> members, Location spawnpoint) {
+    @NotNull
+    private final Cache<OfflinePlayer, Instant> invitations = CacheBuilder.newBuilder()
+            .expireAfterWrite(120L, TimeUnit.SECONDS)
+            .build();
+
+    public Clan(@NotNull UUID id, @NotNull String name, @NotNull OfflinePlayer leader, @NotNull Set<OfflinePlayer> members, @Nullable Location spawnpoint) {
         this.id = id;
         this.name = name;
         this.leader = leader;
@@ -34,12 +52,36 @@ public class Clan {
         this.spawnpoint = spawnpoint;
     }
 
-    public void addMember(OfflinePlayer player) {
+    public boolean isLeader(@NotNull OfflinePlayer player) {
+        return leader.getUniqueId().equals(player.getUniqueId());
+    }
+
+    public void addMember(@NotNull OfflinePlayer player) {
         members.add(player);
+    }
+
+    public void removeMember(@NotNull OfflinePlayer player) {
+        members.remove(player);
+    }
+
+    public Collection<OfflinePlayer> getInvitations() {
+        return new HashSet<>(invitations.asMap().keySet());
+    }
+
+    public void addInvitation(Player player) {
+        invitations.put(player, Instant.now());
+    }
+
+    public boolean isInvited(OfflinePlayer player) {
+        return invitations.asMap().containsKey(player);
     }
 
     public boolean hasMembers() {
         return !members.isEmpty();
+    }
+
+    public boolean hasMember(@NotNull OfflinePlayer player) {
+        return members.contains(player);
     }
 
     public boolean hasSpawnpoint() {
@@ -52,7 +94,8 @@ public class Clan {
         obj.addProperty("name", name);
         obj.addProperty("leader", leader.getUniqueId().toString());
 
-        if (hasSpawnpoint()) {
+        if (this.hasSpawnpoint()) {
+            //noinspection DataFlowIssue - hasSpawnpoint does a null-check implicitly
             obj.addProperty("spawnpoint", Utils.stringifyLocation(spawnpoint, true));
         }
 

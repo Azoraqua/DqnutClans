@@ -29,7 +29,7 @@ public final class ClanManager {
     @SneakyThrows
     public void disbandClan(Clan clan) {
         clans.removeIf((c) -> c.getId() == clan.getId());
-        Files.delete(plugin.getClanDatafolder().toPath().resolve(clan.getId().toString() + ".yml"));
+        Files.delete(plugin.getClanDatafolder().toPath().resolve(clan.getId().toString() + ".json"));
     }
 
     public Collection<Clan> getClans() {
@@ -58,8 +58,12 @@ public final class ClanManager {
 
     @SneakyThrows
     public void save() {
+        int numClans = 0;
+        int numFailed = 0;
+
         for (Clan c : clans) {
             final File dataFile = new File(plugin.getClanDatafolder(), c.getId().toString() + ".json");
+            numClans++;
 
             if (!dataFile.exists()) {
                 dataFile.createNewFile();
@@ -67,12 +71,13 @@ public final class ClanManager {
 
             try (FileWriter w = new FileWriter(dataFile)) {
                 ClanPlugin.GSON.toJson(c.toJson(), w);
-                plugin.getLogger().info("Saved clan: " + c.toJson());
             } catch (IOException ex) {
-                plugin.getLogger().severe("Failed to save clan (" + c.getId() + "):");
-                ex.printStackTrace();
+                numFailed++;
+                plugin.getLogger().warning("Failed to save clan (" + c.getId() + "):");
             }
         }
+
+        plugin.getLogger().info("Saved " + numClans + " clans (" + numFailed + " failed)");
     }
 
     @SneakyThrows
@@ -81,7 +86,12 @@ public final class ClanManager {
             plugin.getClanDatafolder().mkdirs();
         }
 
+        int numClans = 0;
+        int numFailed = 0;
+
         for (File dataFile : Objects.requireNonNull(plugin.getClanDatafolder().listFiles((d, n) -> n.endsWith(".json")))) {
+            numClans++;
+
             if (dataFile.length() == 0) {
                 continue;
             }
@@ -96,12 +106,12 @@ public final class ClanManager {
                 } else {
                     clans.add(clan);
                 }
-
-                plugin.getLogger().info("Loaded clan: " + clan.toJson());
             } catch (IOException ex) {
-                plugin.getLogger().severe("Failed to load clan (" + dataFile.getName().replace(".json", "") + "):");
-                ex.printStackTrace();
+                numFailed++;
+                plugin.getLogger().warning("Failed to load clan (" + dataFile.getName().replace(".json", "") + "):");
             }
         }
+
+        plugin.getLogger().info("Loaded " + numClans + " clans (" + numFailed + " failed)");
     }
 }
