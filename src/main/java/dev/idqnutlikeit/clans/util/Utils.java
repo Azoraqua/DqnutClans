@@ -3,6 +3,7 @@ package dev.idqnutlikeit.clans.util;
 import dev.idqnutlikeit.clans.ClanPlugin;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -29,6 +30,10 @@ public final class Utils {
                 : audience.sender(sender);
 
         target.sendMessage(message);
+    }
+
+    public static void sendMessage(@NotNull CommandSender sender, @NotNull String message) {
+        sendMessage(sender, Component.text(message));
     }
 
     public static Location parseLocation(@NotNull String str) {

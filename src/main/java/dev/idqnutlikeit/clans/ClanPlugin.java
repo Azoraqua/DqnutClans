@@ -3,6 +3,7 @@ package dev.idqnutlikeit.clans;
 import com.google.common.base.Suppliers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dev.idqnutlikeit.clans.util.resolvers.completion.CompletionResolvers;
 import dev.idqnutlikeit.clans.util.resolvers.parameter.ParameterResolvers;
 import me.mattstudios.mf.base.CommandManager;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -41,7 +42,7 @@ public final class ClanPlugin extends JavaPlugin {
         commandManager.get().register(new ClanCommand(clanManager.get()));
 
         // Completion for commands.
-//        commandManager.get().getCompletionHandler().register("#clans", CompletionResolvers.clan(this));
+        commandManager.get().getCompletionHandler().register("#clans", CompletionResolvers.clan(this));
 
         // Parameters for commands.
         commandManager.get().getParameterHandler().register(OfflinePlayer.class, ParameterResolvers.offlinePlayer(this));

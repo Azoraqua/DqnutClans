@@ -29,7 +29,7 @@ public final class ClanManager {
     @SneakyThrows
     public void disbandClan(Clan clan) {
         clans.removeIf((c) -> c.getId() == clan.getId());
-        Files.delete(plugin.getClanDatafolder().toPath().resolve(clan.getId().toString() + ".yml"));
+        Files.delete(plugin.getClanDatafolder().toPath().resolve(clan.getId().toString() + ".json"));
     }
 
     public Collection<Clan> getClans() {
