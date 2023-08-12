@@ -194,7 +194,7 @@ public final class ClanCommand extends CommandBase {
           builder.appendNewline();
 
           if (s instanceof Player player) {
-            builder.append(Component.text(String.format("§eSpawnpoint (§7%d§e): X=§b%d§e, Y=§b%d§e, Z=§b%d§e",
+            builder.append(Component.text(String.format("§eSpawnpoint (§7%d§e): X: §b%d§e, Y: §b%d§e, Z: §b%d§e",
               Math.round(clan.getSpawnpoint().distance(player.getLocation())),
               clan.getSpawnpoint().getBlockX(),
               clan.getSpawnpoint().getBlockY(),
@@ -207,6 +207,8 @@ public final class ClanCommand extends CommandBase {
           builder.append(Component.text("§eBanned Members (§7" + clan.getBannedMembers().size() + "§e): §7" + clan.getBannedMembers().stream().map(OfflinePlayer::getName).collect(Collectors.joining("§f,§e "))));
           builder.appendNewline();
           builder.append(Component.text("§eMuted Members (§7" + clan.getMutedMembers().size() + "§e): §7" + clan.getMutedMembers().stream().map(OfflinePlayer::getName).collect(Collectors.joining("§f,§e "))));
+          builder.appendNewline();
+          builder.append(Component.text("§eApplications (§7" + clan.getApplications().size() + "§e): §7" + clan.getApplications().stream().map(OfflinePlayer::getName).collect(Collectors.joining("§f,§e "))));
         }
 
         Utils.sendMessage(s, builder.build());
@@ -481,6 +483,57 @@ public final class ClanCommand extends CommandBase {
       .append(Component.text("      "))
       .append(Component.text("          §c§lDENY").clickEvent(ClickEvent.runCommand("/clan deny")))
       .appendNewline());
+  }
+
+  @SubCommand("join")
+  @Permission("${base.name}.join")
+  @WrongUsage("§cYou must provide the name of a clan.")
+  public void invite(@NotNull CommandSender sender, @Completion("#clans") @NotNull String clanName) {
+    if (!(sender instanceof Player player)) {
+      Utils.sendMessage(sender, Component.text("§cOnly players can join clans."));
+      return;
+    }
+
+    if (clanManager.hasClan(player)) {
+      Utils.sendMessage(sender, Component.text("§cYou are already in a clan."));
+      return;
+    }
+
+    final java.util.Optional<Clan> optionalClan = clanManager.getClanByName(clanName);
+
+    if (optionalClan.isEmpty()) {
+      Utils.sendMessage(sender, Component.text("§cThe specified clan does not exist."));
+      return;
+    }
+
+    final Clan clan = optionalClan.get();
+
+    if (clan.isBanned(player)) {
+      Utils.sendMessage(sender, "§cYou cannot join a clan that has banned you.");
+      return;
+    }
+
+    clan.addApplication(player);
+    clanManager.save();
+
+    Utils.sendMessage(sender, "§aYou have requested to join §b" + clan.getName() + "§a.");
+
+    if (clan.getLeader() instanceof Player leader) /* Is Online */ {
+      Utils.sendMessage(leader, Component.text()
+        .color(NamedTextColor.AQUA)
+        .append(Component.text(player.getName())
+          .appendSpace()
+          .color(NamedTextColor.YELLOW)
+          .append(Component.text("has requested to join your clan."))
+          .appendNewline()
+          .append(Component.text("§ePlease §aaccept§e or §creject§e the request within §948 hours§e."))
+          .appendNewline()
+          .appendNewline()
+          .append(Component.text("          §a§lACCEPT").clickEvent(ClickEvent.runCommand("/clan applications accept " + player.getName())))
+          .append(Component.text("      "))
+          .append(Component.text("          §c§lREJECT").clickEvent(ClickEvent.runCommand("/clan applications reject " + player.getName())))
+          .appendNewline()));
+    }
   }
 
   @SubCommand("leave")
