@@ -111,6 +111,14 @@ public class Clan {
     return applications.asMap().containsKey(player);
   }
 
+  public boolean isAccepted(@NotNull OfflinePlayer player) {
+    return applications.asMap().containsKey(player) && applications.getIfPresent(player).get();
+  }
+
+  public boolean isRejected(@NotNull OfflinePlayer player) {
+    return applications.asMap().containsKey(player) && !applications.getIfPresent(player).get();
+  }
+
   public void accept(@NotNull OfflinePlayer player) {
     applications.put(player, Optional.of(true));
   }

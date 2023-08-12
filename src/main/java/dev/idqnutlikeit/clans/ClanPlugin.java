@@ -13,6 +13,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 
@@ -51,6 +52,7 @@ public final class ClanPlugin extends JavaPlugin {
       // Completion for commands.
       commandManager.get().getCompletionHandler().register("#none", CompletionResolvers.none());
       commandManager.get().getCompletionHandler().register("#clans", CompletionResolvers.clan(this));
+      commandManager.get().getCompletionHandler().register("#applications_sub_commands", input -> Arrays.asList("accept", "reject"));
 
       // Parameters for commands.
       commandManager.get().getParameterHandler().register(OfflinePlayer.class, ParameterResolvers.offlinePlayer(this));

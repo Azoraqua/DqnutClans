@@ -74,13 +74,13 @@ public final class ClanCommand extends CommandBase {
         .appendNewline()
         .append(Component.text("Deny").clickEvent(ClickEvent.suggestCommand("/clan deny")))
         .appendNewline()
-        .append(Component.text("Invites").clickEvent(ClickEvent.suggestCommand("/clan invites")))
-        .appendNewline()
-        .append(Component.text("Chat §c[message]§e").clickEvent(ClickEvent.suggestCommand("/clan chat")))
+        .append(Component.text("Chat").clickEvent(ClickEvent.suggestCommand("/clan chat")))
         .appendNewline()
         .append(Component.text("Set-Spawn").clickEvent(ClickEvent.suggestCommand("/clan setspawn")))
         .appendNewline()
         .append(Component.text("Spawn").clickEvent(ClickEvent.suggestCommand("/clan spawn")))
+        .appendNewline()
+        .append(Component.text("Applications §b<accept|reject> §b<player>").clickEvent(ClickEvent.suggestCommand("/clan applications")))
     );
   }
 
@@ -513,6 +513,16 @@ public final class ClanCommand extends CommandBase {
       return;
     }
 
+    if (clan.hasMember(player) || clan.isLeader(player)) {
+      Utils.sendMessage(sender, "§cYou are already part of the clan.");
+      return;
+    }
+
+    if (clan.hasApplied(player)) {
+      Utils.sendMessage(sender, "§cYou have already requested to join this clan. Try again later.");
+      return;
+    }
+
     clan.addApplication(player);
     clanManager.save();
 
@@ -630,35 +640,6 @@ public final class ClanCommand extends CommandBase {
     });
   }
 
-  @SubCommand("invites")
-  @Permission("${base.name}.invites")
-  public void invites(@NotNull CommandSender sender) {
-    if (!(sender instanceof Player player)) {
-      Utils.sendMessage(sender, Component.text("§cOnly players can see the invites of their own clan."));
-      return;
-    }
-
-    final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(player);
-
-    if (optionalClan.isEmpty()) {
-      Utils.sendMessage(sender, Component.text("§cYou are not in a clan."));
-      return;
-    }
-
-    final Clan clan = optionalClan.get();
-    final Collection<Clan.Invitation> invitations = clanManager.getInvitations(clan);
-
-    if (invitations.isEmpty()) {
-      Utils.sendMessage(sender, Component.text("§cThere are no invitations currently."));
-      return;
-    }
-
-    Utils.sendMessage(sender, Component.text("§eInvited: §7").append(Component.text(invitations.stream()
-      .map(Clan.Invitation::getPlayer)
-      .map(OfflinePlayer::getName)
-      .collect(Collectors.joining("§f,§7 ")))));
-  }
-
   @SubCommand("chat")
   @Permission("${base.name}.chat")
   public void chat(@NotNull CommandSender sender) {
@@ -740,13 +721,12 @@ public final class ClanCommand extends CommandBase {
   }
 
   @SubCommand("applications")
-  @Alias({"application", "applies"})
   @Permission("${base.name}.applications")
-  @WrongUsage("§cYou must specify §b<accept|reject|list>§c and §b<target>§c.")
+  @WrongUsage("§cYou must specify §b<accept|reject>§c and §b<target>§c.")
   public void applications(
     @NotNull CommandSender sender,
-    @Completion({"accept", "reject"}) @NotNull String sub,
-    @Completion("#player") @NotNull OfflinePlayer target
+    @Completion("#applications_sub_commands") @NotNull String sub,
+    @Completion("#players") @NotNull OfflinePlayer target
   ) {
     if (!(sender instanceof Player player)) {
       Utils.sendMessage(sender, Component.text("§cOnly players can manage applications."));
@@ -756,7 +736,7 @@ public final class ClanCommand extends CommandBase {
     final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(player);
 
     if (optionalClan.isEmpty() || !optionalClan.get().isLeader(player)) {
-      Utils.sendMessage(sender, Component.text("You are not a leader of a clan."));
+      Utils.sendMessage(sender, Component.text("§cYou are not a leader of a clan."));
       return;
     }
 
@@ -765,6 +745,11 @@ public final class ClanCommand extends CommandBase {
 
     switch (sub) {
       case "accept" -> {
+        if (clan.isAccepted(target)) {
+          Utils.sendMessage(sender, Component.text("§cYou have already accepted that player."));
+          return;
+        }
+
         clan.accept(target);
         Utils.sendMessage(sender, Component.text("§aYou have accepted §b" + target.getName() + "§a's application request."));
 
@@ -774,6 +759,11 @@ public final class ClanCommand extends CommandBase {
       }
 
       case "reject" -> {
+        if (clan.isRejected(target)) {
+          Utils.sendMessage(sender, Component.text("§cYou have already rejected that player."));
+          return;
+        }
+
         clan.reject(target);
         Utils.sendMessage(sender, Component.text("§aYou have rejected §b" + target.getName() + "§a's application request."));
 
@@ -781,11 +771,6 @@ public final class ClanCommand extends CommandBase {
           Utils.sendMessage((Player) target, Component.text("§eYour request to join §b" + clan.getName() + " §ehas been §crejected."));
         }
       }
-
-      case "list" -> Utils.sendMessage(sender, Component.text()
-        .append(Component.text("§eApplications: §7"))
-        .append(Component.text(clan.getApplications().stream().map(OfflinePlayer::getName).collect(Collectors.joining("§f, §7 "))))
-        .build());
     }
   }
 }
