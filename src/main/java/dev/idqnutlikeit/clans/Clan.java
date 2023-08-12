@@ -12,14 +12,15 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
+@Builder(builderClassName = "Builder")
 @Getter
 @Setter
 @EqualsAndHashCode
 @ToString
+@RequiredArgsConstructor
+@AllArgsConstructor
 public class Clan {
   @NotNull
   private final UUID id;
@@ -27,18 +28,17 @@ public class Clan {
   private final String name;
   @NotNull
   private final OfflinePlayer leader;
+  @Singular
   @NotNull
-  private final Set<OfflinePlayer> members;
+  private final Set<OfflinePlayer> members = new HashSet<>();
+  @Singular
+  @NotNull
+  private final Set<OfflinePlayer> bannedMembers = new HashSet<>();
+  @Singular
+  @NotNull
+  private final Set<OfflinePlayer> mutedMembers = new HashSet<>();
   @Nullable
   private Location spawnpoint;
-
-  public Clan(@NotNull UUID id, @NotNull String name, @NotNull OfflinePlayer leader, @NotNull Set<OfflinePlayer> members, @Nullable Location spawnpoint) {
-    this.id = id;
-    this.name = name;
-    this.leader = leader;
-    this.members = members;
-    this.spawnpoint = spawnpoint;
-  }
 
   public boolean isLeader(@NotNull OfflinePlayer player) {
     return leader.getUniqueId().equals(player.getUniqueId());
@@ -58,6 +58,38 @@ public class Clan {
 
   public boolean hasMember(@NotNull OfflinePlayer player) {
     return members.contains(player);
+  }
+
+  public void addBannedMember(OfflinePlayer player) {
+    bannedMembers.add(player);
+  }
+
+  public void removeBannedMember(OfflinePlayer player) {
+    bannedMembers.remove(player);
+  }
+
+  public boolean isBanned(OfflinePlayer player) {
+    return bannedMembers.contains(player);
+  }
+
+  public Collection<OfflinePlayer> getBannedMembers() {
+    return Collections.unmodifiableCollection(bannedMembers);
+  }
+
+  public void addMutedMember(OfflinePlayer player) {
+    mutedMembers.add(player);
+  }
+
+  public void removeMutedMember(OfflinePlayer player) {
+    mutedMembers.remove(player);
+  }
+
+  public boolean isMuted(OfflinePlayer player) {
+    return mutedMembers.contains(player);
+  }
+
+  public Collection<OfflinePlayer> getMutedMembers() {
+    return Collections.unmodifiableCollection(mutedMembers);
   }
 
   public boolean hasSpawnpoint() {
@@ -95,16 +127,23 @@ public class Clan {
     members.forEach(m -> memberArr.add(m.getUniqueId().toString()));
     obj.add("members", memberArr);
 
+    final JsonArray bannedMemberArr = new JsonArray();
+    bannedMembers.forEach(m -> bannedMemberArr.add(m.getUniqueId().toString()));
+    obj.add("banned_members", bannedMemberArr);
+
+    final JsonArray mutedMemberArr = new JsonArray();
+    mutedMembers.forEach(m -> mutedMemberArr.add(m.getUniqueId().toString()));
+    obj.add("muted_members", mutedMemberArr);
+
     return obj;
   }
 
   @NotNull
   public static Clan fromJson(JsonObject obj) {
-    final Clan.Builder builder = new Clan.Builder(
-      UUID.fromString(obj.get("id").getAsString()),
-      obj.get("name").getAsString(),
-      Bukkit.getOfflinePlayer(UUID.fromString(obj.get("leader").getAsString()))
-    );
+    final Clan.Builder builder = new Builder()
+      .id(UUID.fromString(obj.get("id").getAsString()))
+      .name(obj.get("name").getAsString())
+      .leader(Bukkit.getOfflinePlayer(UUID.fromString(obj.get("leader").getAsString())));
 
     if (obj.has("spawnpoint")) {
       builder.spawnpoint(Utils.parseLocation(obj.get("spawnpoint").getAsString()));
@@ -116,49 +155,33 @@ public class Clan {
       clan.members.add(Bukkit.getOfflinePlayer(UUID.fromString(m.getAsString())));
     });
 
+    obj.get("banned_members").getAsJsonArray().forEach(m -> {
+      clan.bannedMembers.add(Bukkit.getOfflinePlayer(UUID.fromString(m.getAsString())));
+    });
+
+    obj.get("muted_members").getAsJsonArray().forEach(m -> {
+      clan.mutedMembers.add(Bukkit.getOfflinePlayer(UUID.fromString(m.getAsString())));
+    });
+
     return clan;
   }
 
+  @lombok.Builder
   @Data
   public static final class Invitation {
-    @NotNull private final OfflinePlayer player;
-    @NotNull private final Clan clan;
+    @NotNull
+    private final OfflinePlayer player;
+    @NotNull
+    private final Clan clan;
   }
 
-  public static final class Builder {
+  @lombok.Builder
+  @Data
+  public static final class Application {
     @NotNull
-    private final UUID id;
+    private final OfflinePlayer player;
     @NotNull
-    private final String name;
-    @NotNull
-    private final OfflinePlayer leader;
-    @NotNull
-    private final Set<OfflinePlayer> members = new HashSet<>();
-    @Nullable
-    private Location spawnpoint;
-
-    public Builder(@NotNull UUID id, @NotNull String name, @NotNull OfflinePlayer leader) {
-      this.id = id;
-      this.name = name;
-      this.leader = leader;
-    }
-
-    public Builder(String name, OfflinePlayer leader) {
-      this(UUID.randomUUID(), name, leader);
-    }
-
-    public Builder spawnpoint(Location spawnpoint) {
-      this.spawnpoint = spawnpoint;
-      return this;
-    }
-
-    public Builder member(OfflinePlayer member) {
-      this.members.add(member);
-      return this;
-    }
-
-    public Clan build() {
-      return new Clan(id, name, leader, members, spawnpoint);
-    }
+    private final Clan clan;
+    private boolean accepted;
   }
 }

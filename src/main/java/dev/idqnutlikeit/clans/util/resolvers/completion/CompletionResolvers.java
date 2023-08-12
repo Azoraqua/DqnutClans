@@ -10,7 +10,13 @@ public final class CompletionResolvers {
 
   @Contract("_ -> new")
   @NotNull
-  public static ClansResolver clan(ClanPlugin plugin) {
+  public static ClansResolver clan(@NotNull ClanPlugin plugin) {
     return new ClansResolver(plugin);
+  }
+
+  @Contract("-> new")
+  @NotNull
+  public static NoneResolver none() {
+    return new NoneResolver();
   }
 }

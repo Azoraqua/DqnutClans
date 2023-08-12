@@ -49,6 +49,7 @@ public final class ClanPlugin extends JavaPlugin {
 
     {
       // Completion for commands.
+      commandManager.get().getCompletionHandler().register("#none", CompletionResolvers.none());
       commandManager.get().getCompletionHandler().register("#clans", CompletionResolvers.clan(this));
 
       // Parameters for commands.

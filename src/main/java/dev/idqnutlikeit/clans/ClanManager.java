@@ -31,11 +31,19 @@ public final class ClanManager {
   private final Cache<Clan.Invitation, Instant> invitations = CacheBuilder.newBuilder()
     .expireAfterWrite(Duration.ofSeconds(120))
     .build();
+  @NotNull
+  private final Cache<Clan.Application, Instant> applications = CacheBuilder.newBuilder()
+    .expireAfterWrite(Duration.ofHours(24))
+    .build();
 
   @Contract("_, _ -> new")
   @NotNull
   public Clan createClan(@NotNull String name, @NotNull Player leader) {
-    final Clan clan = new Clan.Builder(name, leader).build();
+    final Clan clan = new Clan.Builder()
+      .id(UUID.randomUUID())
+      .name(name)
+      .leader(leader)
+      .build();
 
     clans.add(clan);
     return clan;
@@ -119,6 +127,26 @@ public final class ClanManager {
     return getInvitations().stream()
       .filter(i -> i.getClan().equals(clan))
       .collect(Collectors.toSet());
+  }
+
+  public void addApplication(OfflinePlayer player, Clan clan) {
+    applications.put(Clan.Application.builder().player(player).clan(clan).build(), Instant.now());
+  }
+
+  public boolean hasApplied(OfflinePlayer player, Clan clan) {
+    return applications.asMap().keySet().stream().anyMatch(a -> a.getPlayer().equals(player) && a.getClan().equals(clan));
+  }
+
+  public boolean hasAplied(OfflinePlayer player) {
+    return applications.asMap().keySet().stream().anyMatch(a -> a.getPlayer().equals(player));
+  }
+
+  public Collection<Clan.Application> getApplications() {
+    return Collections.unmodifiableCollection(applications.asMap().keySet());
+  }
+
+  public Collection<Clan.Application> getApplications(Clan clan) {
+    return getApplications().stream().filter(a -> a.getClan().equals(clan)).collect(Collectors.toUnmodifiableSet());
   }
 
   @SneakyThrows

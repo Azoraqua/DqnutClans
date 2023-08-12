@@ -26,6 +26,12 @@ public final class ClanListener implements Listener {
         final boolean isClanChannel = player.getMetadata("IS_CLAN_CHANNEL").get(0).asBoolean();
 
         if (isClanChannel) {
+          if (c.isMuted(player)) {
+            e.setCancelled(true);
+            Utils.sendMessage(player, Component.text("§cYou cannot talk in the clan chat at this moment."));
+            return;
+          }
+
           e.setFormat("[" + c.getName() + "] " + e.getFormat());
           e.getRecipients().removeIf(p -> !c.hasMember(p) && !c.isLeader(p));
         }

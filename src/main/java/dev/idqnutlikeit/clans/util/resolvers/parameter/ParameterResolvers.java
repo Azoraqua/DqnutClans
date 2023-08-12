@@ -10,13 +10,13 @@ public final class ParameterResolvers {
 
   @Contract("_ -> new")
   @NotNull
-  public static ClanResolver clan(ClanPlugin plugin) {
+  public static ClanResolver clan(@NotNull ClanPlugin plugin) {
     return new ClanResolver(plugin);
   }
 
   @Contract("_ -> new")
   @NotNull
-  public static OfflinePlayerResolver offlinePlayer(ClanPlugin plugin) {
+  public static OfflinePlayerResolver offlinePlayer(@NotNull ClanPlugin plugin) {
     return new OfflinePlayerResolver(plugin);
   }
 }

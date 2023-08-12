@@ -1,6 +1,7 @@
 package dev.idqnutlikeit.clans;
 
 import dev.idqnutlikeit.clans.util.Utils;
+import io.papermc.lib.PaperLib;
 import me.mattstudios.mf.annotations.Optional;
 import me.mattstudios.mf.annotations.*;
 import me.mattstudios.mf.base.CommandBase;
@@ -9,7 +10,9 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.BlockFace;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -20,7 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
-@Command("clan")
+@Command("clans")
 @Alias({"clan", "c"})
 public final class ClanCommand extends CommandBase {
   @NotNull
@@ -38,56 +41,51 @@ public final class ClanCommand extends CommandBase {
 
   @Default
   public void help(@NotNull CommandSender sender) {
-    /*
-     *       - 'dqnutclans.create'
-     *       - 'dqnutclans.disband'
-     *       - 'dqnutclans.list'
-     *       - 'dqnutclans.info'
-     *       - 'dqnutclans.kick'
-     *       - 'dqnutclans.ban'
-     *       - 'dqnutclans.invite'
-     *       - 'dqnutclans.join'
-     *       - 'dqnutclans.leave'
-     *       - 'dqnutclans.accept'
-     *       - 'dqnutclans.deny'
-     *       - 'dqnutclans.chat'
-     */
-
     Utils.sendMessage(sender,
       Component.text()
         .color(NamedTextColor.YELLOW)
         .append(Component.text("Clan Commands:"))
         .appendNewline()
-        .append(Component.text("Create §b<name>§e").clickEvent(ClickEvent.suggestCommand("/clans create")))
+        .append(Component.text("Create §b<name>§e").clickEvent(ClickEvent.suggestCommand("/clan create")))
         .appendNewline()
-        .append(Component.text("Disband§e").clickEvent(ClickEvent.suggestCommand("/clans disband")))
+        .append(Component.text("Disband§e").clickEvent(ClickEvent.suggestCommand("/clan disband")))
         .appendNewline()
-        .append(Component.text("List").clickEvent(ClickEvent.suggestCommand("/clans list")))
+        .append(Component.text("List").clickEvent(ClickEvent.suggestCommand("/clan list")))
         .appendNewline()
-        .append(Component.text("Info §c[clan]§e").clickEvent(ClickEvent.suggestCommand("/clans info")))
+        .append(Component.text("Info §c[clan]§e").clickEvent(ClickEvent.suggestCommand("/clan info")))
         .appendNewline()
-        .append(Component.text("Kick §b<player>§e").clickEvent(ClickEvent.suggestCommand("/clans kick")))
+        .append(Component.text("Kick §b<player>§e").clickEvent(ClickEvent.suggestCommand("/clan kick")))
         .appendNewline()
-        .append(Component.text("Ban §b<player>§e").clickEvent(ClickEvent.suggestCommand("/clans ban")))
+        .append(Component.text("Ban §b<player>§e").clickEvent(ClickEvent.suggestCommand("/clan ban")))
         .appendNewline()
-        .append(Component.text("Invite §b<player>§e").clickEvent(ClickEvent.suggestCommand("/clans invite")))
+        .append(Component.text("Unban §b<player>§e").clickEvent(ClickEvent.suggestCommand("/clan unban")))
         .appendNewline()
-        .append(Component.text("Join §b<clan>§e").clickEvent(ClickEvent.suggestCommand("/clans join")))
+        .append(Component.text("Mute §b<player>§e").clickEvent(ClickEvent.suggestCommand("/clan mute")))
         .appendNewline()
-        .append(Component.text("Leave").clickEvent(ClickEvent.suggestCommand("/clans leave")))
+        .append(Component.text("Unmute §b<player>§e").clickEvent(ClickEvent.suggestCommand("/clan unmute")))
         .appendNewline()
-        .append(Component.text("Accept").clickEvent(ClickEvent.suggestCommand("/clans accept")))
+        .append(Component.text("Invite §b<player>§e").clickEvent(ClickEvent.suggestCommand("/clan invite")))
         .appendNewline()
-        .append(Component.text("Deny").clickEvent(ClickEvent.suggestCommand("/clans deny")))
+        .append(Component.text("Join §b<clan>§e").clickEvent(ClickEvent.suggestCommand("/clan join")))
         .appendNewline()
-        .append(Component.text("Invites").clickEvent(ClickEvent.suggestCommand("/clans invites")))
+        .append(Component.text("Leave").clickEvent(ClickEvent.suggestCommand("/clan leave")))
         .appendNewline()
-        .append(Component.text("Chat §c[message]§e").clickEvent(ClickEvent.suggestCommand("/clans chat")))
+        .append(Component.text("Accept").clickEvent(ClickEvent.suggestCommand("/clan accept")))
+        .appendNewline()
+        .append(Component.text("Deny").clickEvent(ClickEvent.suggestCommand("/clan deny")))
+        .appendNewline()
+        .append(Component.text("Invites").clickEvent(ClickEvent.suggestCommand("/clan invites")))
+        .appendNewline()
+        .append(Component.text("Chat §c[message]§e").clickEvent(ClickEvent.suggestCommand("/clan chat")))
+        .appendNewline()
+        .append(Component.text("Set-Spawn").clickEvent(ClickEvent.suggestCommand("/clan setspawn")))
+        .appendNewline()
+        .append(Component.text("Spawn").clickEvent(ClickEvent.suggestCommand("/clan spawn")))
     );
   }
 
   @SubCommand("create")
-  @Permission("dqnutclans.create")
+  @Permission("${base.name}.create")
   @WrongUsage("§cYou must provide a name for a clan.")
   public void create(@NotNull CommandSender sender, @NotNull String name) {
     if (!(sender instanceof Player leader)) {
@@ -112,14 +110,14 @@ public final class ClanCommand extends CommandBase {
   }
 
   @SubCommand("disband")
-  @Permission("dqnutclans.disband")
+  @Permission("${base.name}.disband")
   public void disband(@NotNull CommandSender sender) {
     if (!(sender instanceof Player leader)) {
       Utils.sendMessage(sender, "Only players can disband clans.");
       return;
     }
 
-    if (!sender.hasPermission("dqnutclans.disband")) {
+    if (!sender.hasPermission("${base.name}.disband")) {
       Utils.sendMessage(sender, "§cYou do not have permission to disband your clan.");
       return;
     }
@@ -143,7 +141,7 @@ public final class ClanCommand extends CommandBase {
   }
 
   @SubCommand("list")
-  @Permission("dqnutclans.list")
+  @Permission("${base.name}.list")
   public void list(@NotNull CommandSender sender) {
     final List<Clan> clans = new ArrayList<>(clanManager.getClans());
 
@@ -181,17 +179,37 @@ public final class ClanCommand extends CommandBase {
   }
 
   @SubCommand("info")
-  @Permission("dqnutclans.info")
+  @Permission("${base.name}.info")
   public void info(@NotNull CommandSender sender, @Completion("#clans") @Optional @Nullable Clan clan) {
     class Info {
       static void show(CommandSender s, Clan clan) {
-        Utils.sendMessage(s, Component.text()
+        final TextComponent.Builder builder = Component.text()
           .append(Component.text("§eClan information for §9" + clan.getName() + "§e:"))
           .appendNewline()
           .append(Component.text("§eLeader: §7" + clan.getLeader().getName()))
           .appendNewline()
-          .append(Component.text("§eMembers (§7" + clan.getMembers().size() + "§e): §7" + clan.getMembers().stream().map(OfflinePlayer::getName).collect(Collectors.joining("§f,§e "))))
-        );
+          .append(Component.text("§eMembers (§7" + clan.getMembers().size() + "§e): §7" + clan.getMembers().stream().map(OfflinePlayer::getName).collect(Collectors.joining("§f,§e "))));
+
+        if (clan.hasSpawnpoint()) {
+          builder.appendNewline();
+
+          if (s instanceof Player player) {
+            builder.append(Component.text(String.format("§eSpawnpoint (§7%d§e): X=§b%d§e, Y=§b%d§e, Z=§b%d§e",
+              Math.round(clan.getSpawnpoint().distance(player.getLocation())),
+              clan.getSpawnpoint().getBlockX(),
+              clan.getSpawnpoint().getBlockY(),
+              clan.getSpawnpoint().getBlockZ())));
+          }
+        }
+
+        if (s instanceof Player player && clan.isLeader(player)) {
+          builder.appendNewline();
+          builder.append(Component.text("§eBanned Members (§7" + clan.getBannedMembers().size() + "§e): §7" + clan.getBannedMembers().stream().map(OfflinePlayer::getName).collect(Collectors.joining("§f,§e "))));
+          builder.appendNewline();
+          builder.append(Component.text("§eMuted Members (§7" + clan.getMutedMembers().size() + "§e): §7" + clan.getMutedMembers().stream().map(OfflinePlayer::getName).collect(Collectors.joining("§f,§e "))));
+        }
+
+        Utils.sendMessage(s, builder.build());
       }
     }
 
@@ -210,7 +228,7 @@ public final class ClanCommand extends CommandBase {
 
       Info.show(player, optionalClan.get());
     } else { // Other clan.
-      if (!sender.hasPermission("dqnutclans.info.others")) {
+      if (!sender.hasPermission("${base.name}.info.others")) {
         Utils.sendMessage(sender, "§cYou do not have permission to view information about other clans.");
         return;
       }
@@ -225,9 +243,9 @@ public final class ClanCommand extends CommandBase {
   }
 
   @SubCommand("kick")
-  @Permission("dqnutclans.kick")
+  @Permission("${base.name}.kick")
   @WrongUsage("§cYou must provide the name of a member.")
-  public void kick(@NotNull CommandSender sender, @Completion("#players") Player member) {
+  public void kick(@NotNull CommandSender sender, @Completion("#players") @NotNull Player member) {
     if (!(sender instanceof Player kicker)) {
       Utils.sendMessage(sender, "§cOnly players can kick members from a clan.");
       return;
@@ -266,29 +284,162 @@ public final class ClanCommand extends CommandBase {
   }
 
   @SubCommand("ban")
-  @Permission("dqnutclans.ban")
+  @Permission("${base.name}.ban")
   @WrongUsage("§cYou must provide the name of a member.")
-  public void ban(@NotNull CommandSender sender, @Completion("#players") Player member) {
-    // TODO: Implement.
+  public void ban(@NotNull CommandSender sender, @Completion("#players") @NotNull OfflinePlayer member) {
+    if (!(sender instanceof Player player)) {
+      Utils.sendMessage(sender, Component.text("§cOnly players can use the ban command."));
+      return;
+    }
+
+    final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(player);
+
+    if (optionalClan.isEmpty()) {
+      Utils.sendMessage(sender, Component.text("§cYou do not have a clan."));
+      return;
+    }
+
+    final Clan clan = optionalClan.get();
+
+    if (!clan.isLeader(player)) {
+      Utils.sendMessage(sender, Component.text("§cOnly the clan leader can ban clan members."));
+      return;
+    }
+
+    if (clan.isBanned(member)) {
+      Utils.sendMessage(sender, Component.text("§cThe specified player is already banned from your clan."));
+      return;
+    }
+
+    clan.removeMember(member);
+    clan.addBannedMember(member);
+    clanManager.removeInvitation(member);
+    clanManager.save();
+    Utils.sendMessage(sender, Component.text("§e" + member.getName() + " has been banned from the clan."));
+
+    if (member instanceof Player) { // Is Online
+      Utils.sendMessage((Player) member, Component.text("§cYou have been banned from the §b" + clan.getName() + "§e clan."));
+    }
   }
 
   @SubCommand("unban")
-  @Permission("dqnutclans.unban")
+  @Permission("${base.name}.unban")
   @WrongUsage("§cYou must provide the name of a member.")
-  public void unban(@NotNull CommandSender sender, @Completion("#players") Player member) {
-    // TODO: Implement.
+  public void unban(@NotNull CommandSender sender, @Completion("#players") @NotNull OfflinePlayer member) {
+    if (!(sender instanceof Player player)) {
+      Utils.sendMessage(sender, Component.text("§cOnly players can use the unban command"));
+      return;
+    }
+
+    final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(player);
+
+    if (optionalClan.isEmpty()) {
+      Utils.sendMessage(sender, Component.text("§cYou do not have a clan."));
+      return;
+    }
+
+    final Clan clan = optionalClan.get();
+
+    if (!clan.isLeader(player)) {
+      Utils.sendMessage(sender, Component.text("§cOnly the leader of the clan can unban people."));
+      return;
+    }
+
+    if (!clan.isBanned(member)) {
+      Utils.sendMessage(sender, Component.text("§cThe specified player is not banned from your clan."));
+      return;
+    }
+
+    clan.removeBannedMember(member);
+    clanManager.save();
+    Utils.sendMessage(sender, Component.text("§e" + member.getName() + " has been unbanned."));
+
+    if (member instanceof Player) { // Is Online
+      Utils.sendMessage(member.getPlayer(), Component.text("§aYou have been unbanned from the §b" + clan.getName() + "§e clan."));
+    }
+  }
+
+  @SubCommand("mute")
+  @Permission("${base.name}.mute")
+  @WrongUsage("§cYou must provide the name of a member.")
+  public void mute(@NotNull CommandSender sender, @Completion("#players") @NotNull OfflinePlayer member) {
+    if (!(sender instanceof Player player)) {
+      Utils.sendMessage(sender, Component.text("§cOnly players can use the mute command."));
+      return;
+    }
+
+    final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(player);
+
+    if (optionalClan.isPresent()) {
+      Clan clan = optionalClan.get();
+
+      if (!clan.isLeader(player)) {
+        Utils.sendMessage(sender, Component.text("§cOnly the clan leader can mute people."));
+        return;
+      }
+
+      if (!clan.hasMember(member)) {
+        Utils.sendMessage(sender, Component.text("§cYou are not a member of a clan."));
+        return;
+      }
+
+      clan.addMutedMember(member);
+      clanManager.save();
+      Utils.sendMessage(sender, Component.text("§b" + member.getName() + "§e has been muted in the clan."));
+
+      if (member instanceof Player) { // Is Online
+        Utils.sendMessage((Player) member, Component.text("§cYou have been muted in the §b" + clan.getName() + "§e clan."));
+      }
+    }
+  }
+
+  @SubCommand("unmute")
+  @Permission("${base.name}.unmute")
+  @WrongUsage("§cYou must provide the name of a member.")
+  public void unmute(@NotNull CommandSender sender, @Completion("#players") @NotNull OfflinePlayer member) {
+    if (!(sender instanceof Player player)) {
+      Utils.sendMessage(sender, Component.text("§cOnly players can use the unmute command"));
+      return;
+    }
+
+    final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(player);
+
+    if (optionalClan.isEmpty()) {
+      Utils.sendMessage(sender, Component.text("§cYou do not have a clan."));
+      return;
+    }
+
+    final Clan clan = optionalClan.get();
+
+    if (!clan.isLeader(player)) {
+      Utils.sendMessage(sender, Component.text("§cOnly the leader of the clan can unmute people."));
+      return;
+    }
+
+    if (!clan.isMuted(member)) {
+      Utils.sendMessage(sender, Component.text("§cThe specified player is not muted in your clan."));
+      return;
+    }
+
+    clan.removeMutedMember(member);
+    clanManager.save();
+    Utils.sendMessage(sender, Component.text("§b" + member.getName() + "§e has been unmuted."));
+
+    if (member instanceof Player) { // Is Online
+      Utils.sendMessage(member.getPlayer(), Component.text("§aYou have been unmuted from the §b" + clan.getName() + "§eclan."));
+    }
   }
 
   @SubCommand("invite")
-  @Permission("dqnutclans.invite")
+  @Permission("${base.name}.invite")
   @WrongUsage("§cYou must provide the name of a player.")
-  public void invite(@NotNull CommandSender sender, @Completion("#players") Player member) {
-    if (!(sender instanceof Player inviter)) {
+  public void invite(@NotNull CommandSender sender, @Completion("#players") @NotNull Player member) {
+    if (!(sender instanceof Player player)) {
       Utils.sendMessage(sender, Component.text("§cOnly players can invite others to a clan"));
       return;
     }
 
-    final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(inviter);
+    final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(player);
 
     if (optionalClan.isEmpty()) {
       Utils.sendMessage(sender, Component.text("§cYou are not in a clan."));
@@ -297,18 +448,23 @@ public final class ClanCommand extends CommandBase {
 
     final Clan clan = optionalClan.get();
 
-    if (!clan.isLeader(inviter)) {
+    if (!clan.isLeader(player)) {
       Utils.sendMessage(sender, Component.text("§cYou are not the leader of the clan."));
       return;
     }
 
-    if (inviter.equals(member)) {
+    if (player.equals(member)) {
       Utils.sendMessage(sender, Component.text("§cYou cannot invite yourself to the clan."));
       return;
     }
 
     if (clanManager.hasClan(member)) {
       Utils.sendMessage(sender, Component.text("§cThat player is already a member of another clan."));
+      return;
+    }
+
+    if (clan.isBanned(member)) {
+      Utils.sendMessage(sender, "§cYou cannot invite a banned clan member.");
       return;
     }
 
@@ -327,8 +483,55 @@ public final class ClanCommand extends CommandBase {
       .appendNewline());
   }
 
+  @SubCommand("join")
+  @Permission("${base.name}.join")
+  public void join(@NotNull CommandSender sender, @Completion("#clans") @NotNull String clanName) {
+    if (!(sender instanceof Player player)) {
+      Utils.sendMessage(sender, Component.text("§cOnly players can join a clan."));
+      return;
+    }
+
+    if (!clanManager.hasClan(clanName)) {
+      Utils.sendMessage(sender, Component.text("§cThe specified clan does not exist."));
+      return;
+    }
+
+    final Clan clan = clanManager.getClanByName(clanName).orElseThrow();
+
+    if (clan.hasMember(player) || clan.isLeader(player)) {
+      Utils.sendMessage(sender, "§cYou are already part of the clan.");
+      return;
+    }
+
+    if (clan.isBanned(player)) {
+      Utils.sendMessage(sender, "§cYou cannot apply because you are banned from the clan.");
+      return;
+    }
+
+    clanManager.addApplication(player, clan);
+    Utils.sendMessage(sender, "§aYou have requested membership for the §b" + clan.getName() + "§a clan.");
+
+    if (clan.getLeader() instanceof Player leader) /* Is Online */ {
+      Utils.sendMessage(leader, Component.text()
+        .append(Component.text("§eNew membership request from §b" + player.getName() + "§e."))
+        .appendNewline()
+        .append(Component.text("§eUse §b/clan accept <name>§e to accept their request."))
+        .appendNewline()
+        .append(Component.text("§eUse §b/clan deny <name>§e to deny their request."))
+        .appendNewline()
+        .appendNewline()
+        .append(Component.text("§7The request will be automatically denied after §c24 hours§7."))
+        .appendNewline()
+        .appendNewline()
+        .append(Component.text("          §a§lACCEPT").clickEvent(ClickEvent.runCommand("/clan accept " + player.getName())))
+        .append(Component.text("      "))
+        .append(Component.text("          §c§lDENY").clickEvent(ClickEvent.runCommand("/clan deny " + player.getName())))
+        .appendNewline());
+    }
+  }
+
   @SubCommand("leave")
-  @Permission("dqnutclans.leave")
+  @Permission("${base.name}.leave")
   public void leave(@NotNull CommandSender sender) {
     if (!(sender instanceof Player player)) {
       Utils.sendMessage(sender, Component.text("§cOnly players can leave a clan."));
@@ -345,19 +548,19 @@ public final class ClanCommand extends CommandBase {
     Clan clan = optionalClan.get();
 
     if (clan.isLeader(player)) {
-      Utils.sendMessage(sender, Component.text("§cYou are the leader of the clan. Use /clan disband to disband the clan."));
+      Utils.sendMessage(sender, Component.text("§cYou are the leader of the clan. Use §b/clan disband§c to disband the clan."));
       return;
     }
 
     clan.removeMember(player);
     clanManager.save();
 
-    Utils.sendMessage(sender, Component.text("§eYou have left " + clan.getName() + " clan."));
-    clan.broadcast(Component.text("§e" + player.getName() + " has left the clan."));
+    Utils.sendMessage(sender, Component.text("§eYou have left §b" + clan.getName() + "§e clan."));
+    clan.broadcast(Component.text("§b" + player.getName() + "§e has left the clan."));
   }
 
   @SubCommand("accept")
-  @Permission("dqnutclans.accept")
+  @Permission("${base.name}.accept")
   public void accept(@NotNull CommandSender sender) {
     if (!(sender instanceof Player player)) {
       Utils.sendMessage(sender, Component.text("§cOnly players can accept clan invitations."));
@@ -371,6 +574,11 @@ public final class ClanCommand extends CommandBase {
 
     clanManager.getInvitation(player).ifPresentOrElse((i) -> {
       final Clan clan = i.getClan();
+
+      if (clan.isBanned(player)) {
+        Utils.sendMessage(player, "§cYou cannot accept the invitation of §b" + clan.getName() + "§e because you are banned from it.");
+        return;
+      }
 
       clan.addMember(player);
       clanManager.removeInvitation(player);
@@ -388,7 +596,7 @@ public final class ClanCommand extends CommandBase {
 
 
   @SubCommand("deny")
-  @Permission("dqnutclans.deny")
+  @Permission("${base.name}.deny")
   public void deny(@NotNull CommandSender sender) {
     if (!(sender instanceof Player player)) {
       Utils.sendMessage(sender, Component.text("§cOnly players can deny clan invitations."));
@@ -417,7 +625,7 @@ public final class ClanCommand extends CommandBase {
   }
 
   @SubCommand("invites")
-  @Permission("dqnutclans.invites")
+  @Permission("${base.name}.invites")
   public void invites(@NotNull CommandSender sender) {
     if (!(sender instanceof Player player)) {
       Utils.sendMessage(sender, Component.text("§cOnly players can see the invites of their own clan."));
@@ -446,7 +654,7 @@ public final class ClanCommand extends CommandBase {
   }
 
   @SubCommand("chat")
-  @Permission("dqnutclans.chat")
+  @Permission("${base.name}.chat")
   public void chat(@NotNull CommandSender sender) {
     if (!(sender instanceof Player player)) {
       Utils.sendMessage(sender, Component.text("§cOnly players can use clan chats."));
@@ -466,5 +674,62 @@ public final class ClanCommand extends CommandBase {
     player.setMetadata("IS_CLAN_CHANNEL", new FixedMetadataValue(plugin, toggledClanChannel));
     player.saveData();
     Utils.sendMessage(player, Component.text("§eClan chat is " + (toggledClanChannel ? "enabled" : "disabled")));
+  }
+
+  @SubCommand("setspawn")
+  @Permission("${base.name}.setspawn")
+  public void setSpawn(@NotNull CommandSender sender, @Completion("#none") @Optional String arg0) {
+    if (!(sender instanceof Player player)) {
+      Utils.sendMessage(sender, Component.text("§cOnly players can set clan spawns."));
+      return;
+    }
+
+    final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(player);
+
+    if (optionalClan.isEmpty()) {
+      Utils.sendMessage(sender, Component.text("You are not a member of a clan!."));
+      return;
+    }
+
+    final Clan clan = optionalClan.get();
+    final Location spawnpoint = player.getLocation();
+
+    if (!spawnpoint.getBlock().getRelative(BlockFace.DOWN).getType().isSolid()) {
+      Utils.sendMessage(sender, Component.text("§cClan spawnpoint is potentially unsafe."));
+      return;
+    }
+
+    clan.setSpawnpoint("none".equalsIgnoreCase(arg0) ? null : spawnpoint);
+    clanManager.save();
+
+    Utils.sendMessage(sender, Component.text("§aYou have set your clan's spawnpoint to your location."));
+  }
+
+  @SubCommand("spawn")
+  @Permission("${base.name}.spawn")
+  public void spawn(@NotNull CommandSender sender) {
+    if (!(sender instanceof Player player)) {
+      Utils.sendMessage(sender, Component.text("§cOnly players can teleport to clan spawns."));
+      return;
+    }
+
+    final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(player);
+
+    if (optionalClan.isEmpty()) {
+      Utils.sendMessage(sender, Component.text("You are not a member of a clan!."));
+      return;
+    }
+
+    final Clan clan = optionalClan.get();
+
+    if (!clan.hasSpawnpoint()) {
+      Utils.sendMessage(sender, Component.text("§cYour clan has no spawnpoint set."));
+      return;
+    }
+
+    final Location spawnpoint = clan.getSpawnpoint();
+
+    PaperLib.teleportAsync(player, spawnpoint);
+    Utils.sendMessage(sender, Component.text("§eYou have been teleported to your clan's spawnpoint."));
   }
 }

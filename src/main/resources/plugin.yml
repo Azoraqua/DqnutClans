@@ -13,51 +13,48 @@ libraries:
   - 'org.projectlombok:lombok:1.18.28'
   - 'org.apache.commons:commons-collections4:4.4'
 
-commands:
-  clans:
-    description: Core command of DqnutClans.
-    aliases: [ clan, c ]
-    usage: /<command>
-
 permissions:
-  clans.*:
+  ${base.name}.*:
     description: Permission to all features of the DqnutClans plugin.
     default: op
     children:
-      - 'clans.admin'
-      - 'clans.member'
-  clans.admin:
+      - '${base.name}.admin'
+      - '${base.name}.member'
+  ${base.name}.admin:
     description: Permission to administrative features of the DqnutClans plugin.
     default: op
     children:
-      - 'dqnutclans.create'
-      - 'dqnutclans.disband'
-      - 'dqnutclans.list'
-      - 'dqnutclans.info'
-      - 'dqnutclans.info.others'
-      - 'dqnutclans.kick'
-      - 'dqnutclans.ban'
-      - 'dqnutclans.invite'
-      - 'dqnutclans.join'
-      - 'dqnutclans.leave'
-      - 'dqnutclans.accept'
-      - 'dqnutclans.deny'
-      - 'dqnutclans.invites'
-      - 'dqnutclans.chat'
-  clans.member:
-    description: Permission to regular features of the DqnutClans plugin.
+      - '${base.name}.create'
+      - '${base.name}.disband'
+      - '${base.name}.list'
+      - '${base.name}.info'
+      - '${base.name}.info.others'
+      - '${base.name}.kick'
+      - '${base.name}.ban'
+      - '${base.name}.unban'
+      - '${base.name}.mute'
+      - '${base.name}.unmute'
+      - '${base.name}.invite'
+      - '${base.name}.join'
+      - '${base.name}.leave'
+      - '${base.name}.accept'
+      - '${base.name}.deny'
+      - '${base.name}.invites'
+      - '${base.name}.chat'
+  ${base.name}.member:
+    description: Permission to regular features of the ${base.name} plugin.
     default: true
     children:
-      - 'dqnutclans.create'
-      - 'dqnutclans.disband'
-      - 'dqnutclans.list'
-      - 'dqnutclans.info'
-      - 'dqnutclans.kick'
-      - 'dqnutclans.ban'
-      - 'dqnutclans.invite'
-      - 'dqnutclans.join'
-      - 'dqnutclans.leave'
-      - 'dqnutclans.accept'
-      - 'dqnutclans.deny'
-      - 'dqnutclans.invites'
-      - 'dqnutclans.chat'
+      - '${base.name}.create'
+      - '${base.name}.disband'
+      - '${base.name}.list'
+      - '${base.name}.info'
+      - '${base.name}.kick'
+      - '${base.name}.ban'
+      - '${base.name}.invite'
+      - '${base.name}.join'
+      - '${base.name}.leave'
+      - '${base.name}.accept'
+      - '${base.name}.deny'
+      - '${base.name}.invites'
+      - '${base.name}.chat'
