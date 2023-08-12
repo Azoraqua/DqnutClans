@@ -685,4 +685,54 @@ public final class ClanCommand extends CommandBase {
     PaperLib.teleportAsync(player, spawnpoint);
     Utils.sendMessage(sender, Component.text("§eYou have been teleported to your clan's spawnpoint."));
   }
+
+  @SubCommand("applications")
+  @Alias({"application", "applies"})
+  @Permission("${base.name}.applications")
+  @WrongUsage("§cYou must specify §b<accept|reject|list>§c and §b<target>§c.")
+  public void applications(
+    @NotNull CommandSender sender,
+    @Completion({"accept", "reject"}) @NotNull String sub,
+    @Completion("#player") @NotNull OfflinePlayer target
+  ) {
+    if (!(sender instanceof Player player)) {
+      Utils.sendMessage(sender, Component.text("§cOnly players can manage applications."));
+      return;
+    }
+
+    final java.util.Optional<Clan> optionalClan = clanManager.getClanByPlayer(player);
+
+    if (optionalClan.isEmpty() || !optionalClan.get().isLeader(player)) {
+      Utils.sendMessage(sender, Component.text("You are not a leader of a clan."));
+      return;
+    }
+
+    final Clan clan = optionalClan.get();
+    final Collection<OfflinePlayer> applications = clan.getApplications();
+
+    switch (sub) {
+      case "accept" -> {
+        clan.accept(target);
+        Utils.sendMessage(sender, Component.text("§aYou have accepted §b" + target.getName() + "§a's application request."));
+
+        if (target instanceof Player) /* Is Online */ {
+          Utils.sendMessage((Player) target, Component.text("§eYour request to join §b" + clan.getName() + " §ehas been §aaccepted."));
+        }
+      }
+
+      case "reject" -> {
+        clan.reject(target);
+        Utils.sendMessage(sender, Component.text("§aYou have rejected §b" + target.getName() + "§a's application request."));
+
+        if (target instanceof Player) /* Is Online */ {
+          Utils.sendMessage((Player) target, Component.text("§eYour request to join §b" + clan.getName() + " §ehas been §crejected."));
+        }
+      }
+
+      case "list" -> Utils.sendMessage(sender, Component.text()
+        .append(Component.text("§eApplications: §7"))
+        .append(Component.text(clan.getApplications().stream().map(OfflinePlayer::getName).collect(Collectors.joining("§f, §7 "))))
+        .build());
+    }
+  }
 }

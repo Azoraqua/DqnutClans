@@ -1,5 +1,7 @@
 package dev.idqnutlikeit.clans;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import dev.idqnutlikeit.clans.util.Utils;
@@ -12,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.*;
 
 @Builder(builderClassName = "Builder")
@@ -37,6 +40,8 @@ public class Clan {
   @Singular
   @NotNull
   private final Set<OfflinePlayer> mutedMembers = new HashSet<>();
+  @NotNull
+  private final Cache<OfflinePlayer, Optional<Boolean>> applications = CacheBuilder.newBuilder().expireAfterWrite(Duration.ofHours(48)).build();
   @Nullable
   private Location spawnpoint;
 
@@ -60,36 +65,63 @@ public class Clan {
     return members.contains(player);
   }
 
-  public void addBannedMember(OfflinePlayer player) {
+  public void addBannedMember(@NotNull OfflinePlayer player) {
     bannedMembers.add(player);
   }
 
-  public void removeBannedMember(OfflinePlayer player) {
+  public void removeBannedMember(@NotNull OfflinePlayer player) {
     bannedMembers.remove(player);
   }
 
-  public boolean isBanned(OfflinePlayer player) {
+  public boolean isBanned(@NotNull OfflinePlayer player) {
     return bannedMembers.contains(player);
   }
 
+  @NotNull
   public Collection<OfflinePlayer> getBannedMembers() {
     return Collections.unmodifiableCollection(bannedMembers);
   }
 
-  public void addMutedMember(OfflinePlayer player) {
+  public void addMutedMember(@NotNull OfflinePlayer player) {
     mutedMembers.add(player);
   }
 
-  public void removeMutedMember(OfflinePlayer player) {
+  public void removeMutedMember(@NotNull OfflinePlayer player) {
     mutedMembers.remove(player);
   }
 
-  public boolean isMuted(OfflinePlayer player) {
+  public boolean isMuted(@NotNull OfflinePlayer player) {
     return mutedMembers.contains(player);
   }
 
+  @NotNull
   public Collection<OfflinePlayer> getMutedMembers() {
     return Collections.unmodifiableCollection(mutedMembers);
+  }
+
+  public void addApplication(@NotNull OfflinePlayer player, boolean accepted) {
+    applications.put(player, Optional.of(accepted));
+  }
+
+  public void addApplication(@NotNull OfflinePlayer player) {
+    applications.put(player, Optional.empty());
+  }
+
+  public boolean hasApplied(@NotNull OfflinePlayer player) {
+    return applications.asMap().containsKey(player);
+  }
+
+  public void accept(@NotNull OfflinePlayer player) {
+    applications.put(player, Optional.of(true));
+  }
+
+  public void reject(@NotNull OfflinePlayer player) {
+    applications.put(player, Optional.of(false));
+  }
+
+  @NotNull
+  public Collection<OfflinePlayer> getApplications() {
+    return Collections.unmodifiableCollection(applications.asMap().keySet());
   }
 
   public boolean hasSpawnpoint() {
@@ -135,6 +167,16 @@ public class Clan {
     mutedMembers.forEach(m -> mutedMemberArr.add(m.getUniqueId().toString()));
     obj.add("muted_members", mutedMemberArr);
 
+    final JsonArray applicationsArr = new JsonArray();
+    applications.asMap().forEach((m, a) -> {
+      if (a.isPresent()) {
+        applicationsArr.add(String.format("%s:%s", m.getUniqueId(), a.get()));
+      } else {
+        applicationsArr.add(String.format("%s", m.getUniqueId()));
+      }
+    });
+    obj.add("applications", applicationsArr);
+
     return obj;
   }
 
@@ -163,6 +205,21 @@ public class Clan {
       clan.mutedMembers.add(Bukkit.getOfflinePlayer(UUID.fromString(m.getAsString())));
     });
 
+    obj.get("muted_members").getAsJsonArray().forEach(m -> {
+      clan.mutedMembers.add(Bukkit.getOfflinePlayer(UUID.fromString(m.getAsString())));
+    });
+
+    obj.get("applications").getAsJsonArray().forEach((e) -> {
+      final String[] parts = e.getAsString().split(":");
+      final OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(parts[0]));
+
+      if (parts.length == 2) { // Reviewed
+        clan.addApplication(player, Boolean.parseBoolean(parts[1]));
+      } else {
+        clan.addApplication(player);
+      }
+    });
+
     return clan;
   }
 
@@ -173,15 +230,5 @@ public class Clan {
     private final OfflinePlayer player;
     @NotNull
     private final Clan clan;
-  }
-
-  @lombok.Builder
-  @Data
-  public static final class Application {
-    @NotNull
-    private final OfflinePlayer player;
-    @NotNull
-    private final Clan clan;
-    private boolean accepted;
   }
 }
