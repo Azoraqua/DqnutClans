@@ -1,6 +1,6 @@
 package dev.idqnutlikeit.clans;
 
-import dev.idqnutlikeit.clans.util.Utils;
+import dev.idqnutlikeit.clans.util.MessageUtils;
 import lombok.AllArgsConstructor;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Entity;
@@ -28,7 +28,7 @@ public final class ClanListener implements Listener {
         if (isClanChannel) {
           if (c.isMuted(player)) {
             e.setCancelled(true);
-            Utils.sendMessage(player, Component.text("§cYou cannot talk in the clan chat at this moment."));
+            MessageUtils.send(player, Component.text("§cYou cannot talk in the clan chat at this moment."));
             return;
           }
 
@@ -52,7 +52,7 @@ public final class ClanListener implements Listener {
 
         if (damagedClan.getId().equals(damagerClan.getId())) {
           e.setCancelled(true);
-          Utils.sendMessage(damagerPlayer, Component.text("§cYou cannot harm players of your own clan."));
+          MessageUtils.send(damagerPlayer, Component.text("§cYou cannot harm players of your own clan."));
         }
       }
     }

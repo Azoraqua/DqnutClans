@@ -4,7 +4,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import dev.idqnutlikeit.clans.util.Utils;
+import dev.idqnutlikeit.clans.util.MessageUtils;
+import dev.idqnutlikeit.clans.util.SerializationUtils;
 import lombok.*;
 import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.Bukkit;
@@ -138,13 +139,13 @@ public class Clan {
 
   public void broadcast(@NotNull ComponentLike message, boolean includeLeader) {
     if (includeLeader && leader instanceof Player) {
-      Utils.sendMessage((Player) leader, message);
+      MessageUtils.send((Player) leader, message);
     }
 
     members.stream()
       .filter(p -> p instanceof Player)
       .map(p -> (Player) p)
-      .forEach(m -> Utils.sendMessage(m, message));
+      .forEach(m -> MessageUtils.send(m, message));
   }
 
   public void broadcast(@NotNull ComponentLike message) {
@@ -160,7 +161,7 @@ public class Clan {
 
     if (this.hasSpawnpoint()) {
       //noinspection DataFlowIssue - hasSpawnpoint does a null-check implicitly
-      obj.addProperty("spawnpoint", Utils.stringifyLocation(spawnpoint, true));
+      obj.addProperty("spawnpoint", SerializationUtils.stringifyLocation(spawnpoint, true));
     }
 
     final JsonArray memberArr = new JsonArray();
@@ -196,7 +197,7 @@ public class Clan {
       .leader(Bukkit.getOfflinePlayer(UUID.fromString(obj.get("leader").getAsString())));
 
     if (obj.has("spawnpoint")) {
-      builder.spawnpoint(Utils.parseLocation(obj.get("spawnpoint").getAsString()));
+      builder.spawnpoint(SerializationUtils.parseLocation(obj.get("spawnpoint").getAsString()));
     }
 
     final Clan clan = builder.build();
