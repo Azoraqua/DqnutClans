@@ -2,36 +2,57 @@ name: '${artifactId}'
 version: '${version}'
 main: dev.idqnutlikeit.clans.ClanPlugin
 api-version: '1.20'
+authors: [ IDqnutLikeIt, Azoraqua ]
+softdepend: [ PlaceholderAPI, Vault ]
 
 libraries:
   - 'me.mattstudios.utils:matt-framework:1.4'
-  - 'net.kyori:adventure-api:1.14.0'
+  - 'net.kyori:adventure-api:4.14.0'
   - 'net.kyori:adventure-platform-bukkit:4.3.0'
-  - 'io.papermc:paperlib:1.0.7'
   - 'com.google.guava:guava:32.1.2-jre'
-
-commands:
-  clans:
-    description: Core command of DqnutClans.
-    aliases: [clan, c]
-    usage: /<command>
+  - 'org.projectlombok:lombok:1.18.28'
+  - 'org.apache.commons:commons-collections4:4.4'
 
 permissions:
-  clans.admin:
+  ${base.name}.*:
+    description: Permission to all features of the DqnutClans plugin.
+    default: op
+    children:
+      - '${base.name}.admin'
+      - '${base.name}.user'
+  ${base.name}.admin:
     description: Permission to administrative features of the DqnutClans plugin.
     default: op
     children:
-      - 'dqnutclans.help'
-      - 'dqnutclans.create'
-      - 'dqnutclans.disband'
-      - 'dqnutclans.disband.others'
-      - 'dqnutclans.list'
-      - 'dqnutclans.info'
-      - 'dqnutclans.kick'
-      - 'dqnutclans.ban'
-      - 'dqnutclans.invite'
-      - 'dqnutclans.join'
-      - 'dqnutclans.leave'
-      - 'dqnutclans.accept'
-      - 'dqnutclans.deny'
-      - 'dqnutclans.chat'
+      - '${base.name}.create'
+      - '${base.name}.disband'
+      - '${base.name}.list'
+      - '${base.name}.info'
+      - '${base.name}.info.others'
+      - '${base.name}.kick'
+      - '${base.name}.ban'
+      - '${base.name}.unban'
+      - '${base.name}.mute'
+      - '${base.name}.unmute'
+      - '${base.name}.invite'
+      - '${base.name}.leave'
+      - '${base.name}.accept'
+      - '${base.name}.deny'
+      - '${base.name}.invites'
+      - '${base.name}.chat'
+  ${base.name}.user:
+    description: Permission to regular features of the ${base.name} plugin.
+    default: true
+    children:
+      - '${base.name}.create'
+      - '${base.name}.disband'
+      - '${base.name}.list'
+      - '${base.name}.info'
+      - '${base.name}.kick'
+      - '${base.name}.ban'
+      - '${base.name}.invite'
+      - '${base.name}.leave'
+      - '${base.name}.accept'
+      - '${base.name}.deny'
+      - '${base.name}.invites'
+      - '${base.name}.chat'
