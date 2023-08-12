@@ -77,6 +77,7 @@ public final class ClanPlugin extends JavaPlugin {
   @Override
   public void onDisable() {
     clanManager.get().save();
+    clanManager.get().cleanup();
     audience.get().close();
   }
 

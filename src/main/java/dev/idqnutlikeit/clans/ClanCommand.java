@@ -483,53 +483,6 @@ public final class ClanCommand extends CommandBase {
       .appendNewline());
   }
 
-  @SubCommand("join")
-  @Permission("${base.name}.join")
-  public void join(@NotNull CommandSender sender, @Completion("#clans") @NotNull String clanName) {
-    if (!(sender instanceof Player player)) {
-      Utils.sendMessage(sender, Component.text("§cOnly players can join a clan."));
-      return;
-    }
-
-    if (!clanManager.hasClan(clanName)) {
-      Utils.sendMessage(sender, Component.text("§cThe specified clan does not exist."));
-      return;
-    }
-
-    final Clan clan = clanManager.getClanByName(clanName).orElseThrow();
-
-    if (clan.hasMember(player) || clan.isLeader(player)) {
-      Utils.sendMessage(sender, "§cYou are already part of the clan.");
-      return;
-    }
-
-    if (clan.isBanned(player)) {
-      Utils.sendMessage(sender, "§cYou cannot apply because you are banned from the clan.");
-      return;
-    }
-
-    clanManager.addApplication(player, clan);
-    Utils.sendMessage(sender, "§aYou have requested membership for the §b" + clan.getName() + "§a clan.");
-
-    if (clan.getLeader() instanceof Player leader) /* Is Online */ {
-      Utils.sendMessage(leader, Component.text()
-        .append(Component.text("§eNew membership request from §b" + player.getName() + "§e."))
-        .appendNewline()
-        .append(Component.text("§eUse §b/clan accept <name>§e to accept their request."))
-        .appendNewline()
-        .append(Component.text("§eUse §b/clan deny <name>§e to deny their request."))
-        .appendNewline()
-        .appendNewline()
-        .append(Component.text("§7The request will be automatically denied after §c24 hours§7."))
-        .appendNewline()
-        .appendNewline()
-        .append(Component.text("          §a§lACCEPT").clickEvent(ClickEvent.runCommand("/clan accept " + player.getName())))
-        .append(Component.text("      "))
-        .append(Component.text("          §c§lDENY").clickEvent(ClickEvent.runCommand("/clan deny " + player.getName())))
-        .appendNewline());
-    }
-  }
-
   @SubCommand("leave")
   @Permission("${base.name}.leave")
   public void leave(@NotNull CommandSender sender) {

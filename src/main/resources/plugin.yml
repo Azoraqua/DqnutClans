@@ -19,7 +19,7 @@ permissions:
     default: op
     children:
       - '${base.name}.admin'
-      - '${base.name}.member'
+      - '${base.name}.user'
   ${base.name}.admin:
     description: Permission to administrative features of the DqnutClans plugin.
     default: op
@@ -35,13 +35,12 @@ permissions:
       - '${base.name}.mute'
       - '${base.name}.unmute'
       - '${base.name}.invite'
-      - '${base.name}.join'
       - '${base.name}.leave'
       - '${base.name}.accept'
       - '${base.name}.deny'
       - '${base.name}.invites'
       - '${base.name}.chat'
-  ${base.name}.member:
+  ${base.name}.user:
     description: Permission to regular features of the ${base.name} plugin.
     default: true
     children:
@@ -52,7 +51,6 @@ permissions:
       - '${base.name}.kick'
       - '${base.name}.ban'
       - '${base.name}.invite'
-      - '${base.name}.join'
       - '${base.name}.leave'
       - '${base.name}.accept'
       - '${base.name}.deny'

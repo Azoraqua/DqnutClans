@@ -48,8 +48,8 @@ public final class ClanPlaceholder extends PlaceholderExpansion {
         case "invitation_count" -> String.valueOf(plugin.getClanManager().getInvitations(clan).size());
         default -> super.onRequest(player, name);
       };
+    } else {
+      return "N/A";
     }
-
-    return super.onRequest(player, name);
   }
 }

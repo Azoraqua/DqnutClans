@@ -31,10 +31,6 @@ public final class ClanManager {
   private final Cache<Clan.Invitation, Instant> invitations = CacheBuilder.newBuilder()
     .expireAfterWrite(Duration.ofSeconds(120))
     .build();
-  @NotNull
-  private final Cache<Clan.Application, Instant> applications = CacheBuilder.newBuilder()
-    .expireAfterWrite(Duration.ofHours(24))
-    .build();
 
   @Contract("_, _ -> new")
   @NotNull
@@ -52,7 +48,8 @@ public final class ClanManager {
   @SneakyThrows
   public void disbandClan(@NotNull Clan clan) {
     clans.removeIf((c) -> c.getId() == clan.getId());
-    Files.delete(plugin.getClanDatafolder().toPath().resolve(clan.getId().toString() + ".json"));
+    invitations.invalidateAll(Arrays.asList(invitations.asMap().keySet().stream().filter(i -> i.getClan().equals(clan)).toArray()));
+    Files.delete(plugin.getClanDatafolder().toPath().resolve(clan.getId() + ".json"));
   }
 
   @NotNull
@@ -110,8 +107,7 @@ public final class ClanManager {
   }
 
   public boolean hasInvitation(@NotNull OfflinePlayer player) {
-    return invitations.asMap().keySet().stream()
-      .anyMatch(i -> i.getPlayer().equals(player));
+    return getInvitation(player).isPresent();
   }
 
   public Optional<Clan.Invitation> getInvitation(@NotNull OfflinePlayer player) {
@@ -124,33 +120,18 @@ public final class ClanManager {
   }
 
   public Collection<Clan.Invitation> getInvitations(@NotNull Clan clan) {
-    return getInvitations().stream()
+    return invitations.asMap().keySet().stream()
       .filter(i -> i.getClan().equals(clan))
       .collect(Collectors.toSet());
   }
 
-  public void addApplication(OfflinePlayer player, Clan clan) {
-    applications.put(Clan.Application.builder().player(player).clan(clan).build(), Instant.now());
-  }
-
-  public boolean hasApplied(OfflinePlayer player, Clan clan) {
-    return applications.asMap().keySet().stream().anyMatch(a -> a.getPlayer().equals(player) && a.getClan().equals(clan));
-  }
-
-  public boolean hasAplied(OfflinePlayer player) {
-    return applications.asMap().keySet().stream().anyMatch(a -> a.getPlayer().equals(player));
-  }
-
-  public Collection<Clan.Application> getApplications() {
-    return Collections.unmodifiableCollection(applications.asMap().keySet());
-  }
-
-  public Collection<Clan.Application> getApplications(Clan clan) {
-    return getApplications().stream().filter(a -> a.getClan().equals(clan)).collect(Collectors.toUnmodifiableSet());
+  public void cleanup() {
+    clans.clear();
+    invitations.invalidateAll();
   }
 
   @SneakyThrows
-  public void save() {
+  public synchronized void save() {
     int numClans = 0;
     int numFailed = 0;
 
@@ -174,7 +155,7 @@ public final class ClanManager {
   }
 
   @SneakyThrows
-  public void load() {
+  public synchronized void load() {
     if (!plugin.getClanDatafolder().exists()) {
       plugin.getClanDatafolder().mkdirs();
     }
