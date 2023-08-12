@@ -34,9 +34,9 @@ public final class ClanPlugin extends JavaPlugin {
 
   @Override
   public void onEnable() {
-    if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
-      super.getLogger().info("Vault found. Hooking into it.");
-    }
+//    if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
+//      super.getLogger().info("Vault found. Hooking into it.");
+//    }
 
     if (Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
       super.getLogger().info("PlaceholderAPI found. Hooking into it.");
@@ -45,7 +45,6 @@ public final class ClanPlugin extends JavaPlugin {
 
     {
       super.saveResource("config.yml", false);
-      super.saveResource("messages.yml", false);
     }
 
     {
