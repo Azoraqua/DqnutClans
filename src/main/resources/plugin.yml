@@ -24,6 +24,11 @@ permissions:
     description: Permission to administrative features of the DqnutClans plugin.
     default: op
     children:
+      - '${base.name}.user'
+  ${base.name}.user:
+    description: Permission to regular features of the ${base.name} plugin.
+    default: true
+    children:
       - '${base.name}.create'
       - '${base.name}.disband'
       - '${base.name}.list'
@@ -38,21 +43,7 @@ permissions:
       - '${base.name}.leave'
       - '${base.name}.accept'
       - '${base.name}.deny'
-      - '${base.name}.invites'
+      - '${base.name}.setspawn'
+      - '${base.name}.spawn'
       - '${base.name}.chat'
-  ${base.name}.user:
-    description: Permission to regular features of the ${base.name} plugin.
-    default: true
-    children:
-      - '${base.name}.create'
-      - '${base.name}.disband'
-      - '${base.name}.list'
-      - '${base.name}.info'
-      - '${base.name}.kick'
-      - '${base.name}.ban'
-      - '${base.name}.invite'
-      - '${base.name}.leave'
-      - '${base.name}.accept'
-      - '${base.name}.deny'
-      - '${base.name}.invites'
-      - '${base.name}.chat'
+      - '${base.name}.applications'
