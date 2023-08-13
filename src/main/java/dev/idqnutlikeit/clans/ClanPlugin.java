@@ -74,13 +74,6 @@ public final class ClanPlugin extends JavaPlugin {
     }, 20L * 10L, 20L * getConfig().getLong("auto-save-interval", 30L));
   }
 
-
-  @Override
-  public void onDisable() {
-    clanManager.get().save();
-    clanManager.get().cleanup();
-  }
-
   @NotNull
   public BukkitAudiences getAudience() {
     return audience.get();
