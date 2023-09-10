@@ -10,12 +10,28 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.jetbrains.annotations.NotNull;
 
 @AllArgsConstructor
 public final class ClanListener implements Listener {
   @NotNull
   private final ClanPlugin plugin;
+
+  @EventHandler
+  public void onJoin(PlayerJoinEvent e) {
+    if (plugin.getScoreboard() != null) {
+      plugin.getScoreboard().addViewer(e.getPlayer());
+    }
+  }
+
+  @EventHandler
+  public void onQuit(PlayerQuitEvent e) {
+    if (plugin.getScoreboard() != null) {
+      plugin.getScoreboard().removeViewer(e.getPlayer());
+    }
+  }
 
   @EventHandler(priority = EventPriority.LOW)
   public void onChat(AsyncPlayerChatEvent e) {

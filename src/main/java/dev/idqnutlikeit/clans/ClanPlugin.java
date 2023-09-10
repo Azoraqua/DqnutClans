@@ -5,15 +5,21 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dev.idqnutlikeit.clans.util.resolvers.completion.CompletionResolvers;
 import dev.idqnutlikeit.clans.util.resolvers.parameter.ParameterResolvers;
+import lombok.Getter;
+import me.catcoder.sidebar.ProtocolSidebar;
+import me.catcoder.sidebar.Sidebar;
 import me.mattstudios.mf.base.CommandManager;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 
@@ -31,6 +37,9 @@ public final class ClanPlugin extends JavaPlugin {
   private final Supplier<ClanManager> clanManager = Suppliers.memoize(() -> new ClanManager(this));
   @NotNull
   private final Supplier<File> clanDatafolder = Suppliers.memoize(() -> new File(super.getDataFolder(), "clans"));
+  @Nullable
+  @Getter
+  private Sidebar<Component> scoreboard;
 
   @Override
   public void onEnable() {
@@ -45,6 +54,40 @@ public final class ClanPlugin extends JavaPlugin {
 
     {
       super.saveResource("config.yml", false);
+
+      if (getConfig().getBoolean("sidebar.enabled")) {
+        scoreboard = ProtocolSidebar.newAdventureSidebar(
+          Component.text(Objects.requireNonNull(getConfig().getString("sidebar.title"))),
+          this
+        );
+
+        for (String line : getConfig().getStringList("sidebar.lines")) {
+          if (line.isBlank()) {
+            scoreboard.addBlankLine();
+          } else {
+            if (line.contains("%")) {
+              scoreboard.addUpdatableLine((p) ->
+                Component.text(line
+                  .replace("%clan_name%", getClanManager().getClanByPlayer(p)
+                    .map(Clan::getName).get())
+                  .replace("%clan_leader%", getClanManager().getClanByPlayer(p)
+                    .map(Clan::getLeader)
+                    .map(OfflinePlayer::getName)
+                    .get())
+                  .replace("%clan_member_count%", getClanManager().getClanByPlayer(p)
+                    .map(c -> String.valueOf(c.getMembers().size()))
+                    .get())
+                ));
+            } else {
+              scoreboard.addLine(Component.text(line));
+            }
+          }
+        }
+
+        if (scoreboard.getLines().stream().anyMatch(l -> l.getTeamName().contains("%"))) {
+          scoreboard.updateLinesPeriodically(0, 1000, true);
+        }
+      }
     }
 
     {

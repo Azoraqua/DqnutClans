@@ -6,7 +6,7 @@
 
   <groupId>dev.idqnutlikeit</groupId>
   <artifactId>DqnutClans</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.1-SNAPSHOT</version>
 
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
@@ -84,12 +84,6 @@
 
             <configuration>
               <minimizeJar>true</minimizeJar>
-
-              <artifactSet>
-                <includes>
-                  <include>io.papermc:paperlib</include>
-                </includes>
-              </artifactSet>
             </configuration>
           </execution>
         </executions>
@@ -116,6 +110,11 @@
     <repository>
       <id>jitpack.io</id>
       <url>https://jitpack.io</url>
+    </repository>
+
+    <repository>
+      <id>sonatype-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
     </repository>
   </repositories>
 
@@ -181,6 +180,12 @@
       <artifactId>paperlib</artifactId>
       <version>1.0.8</version>
       <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>me.catcoder</groupId>
+      <artifactId>bukkit-sidebar</artifactId>
+      <version>6.2.3-SNAPSHOT</version>
     </dependency>
   </dependencies>
 </project>
