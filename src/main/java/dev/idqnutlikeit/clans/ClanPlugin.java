@@ -3,6 +3,7 @@ package dev.idqnutlikeit.clans;
 import com.google.common.base.Suppliers;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dev.idqnutlikeit.clans.storage.Storage;
 import dev.idqnutlikeit.clans.util.resolvers.completion.CompletionResolvers;
 import dev.idqnutlikeit.clans.util.resolvers.parameter.ParameterResolvers;
 import lombok.Getter;
@@ -33,10 +34,9 @@ public final class ClanPlugin extends JavaPlugin {
   private final Supplier<BukkitAudiences> audience = Suppliers.memoize(() -> BukkitAudiences.create(this));
   @NotNull
   private final Supplier<CommandManager> commandManager = Suppliers.memoize(() -> new CommandManager(this));
-  @NotNull
-  private final Supplier<ClanManager> clanManager = Suppliers.memoize(() -> new ClanManager(this));
-  @NotNull
-  private final Supplier<File> clanDatafolder = Suppliers.memoize(() -> new File(super.getDataFolder(), "clans"));
+  private Supplier<ClanManager> clanManager;
+//  @NotNull
+//  private final Supplier<File> clanDatafolder = Suppliers.memoize(() -> new File(super.getDataFolder(), "clans"));
   @Nullable
   @Getter
   private Sidebar<Component> scoreboard;
@@ -55,6 +55,10 @@ public final class ClanPlugin extends JavaPlugin {
     {
       super.saveResource("config.yml", false);
 
+      clanManager = Suppliers.memoize(() -> new ClanManager(
+        this,
+        Storage.Factory.createFromConfig(Objects.requireNonNull(getConfig().getConfigurationSection("storage")))));
+
       if (getConfig().getBoolean("sidebar.enabled")) {
         scoreboard = ProtocolSidebar.newAdventureSidebar(
           Component.text(Objects.requireNonNull(getConfig().getString("sidebar.title"))),
@@ -66,18 +70,18 @@ public final class ClanPlugin extends JavaPlugin {
             scoreboard.addBlankLine();
           } else {
             if (line.contains("%")) {
-              scoreboard.addUpdatableLine((p) ->
-                Component.text(line
-                  .replace("%clan_name%", getClanManager().getClanByPlayer(p)
-                    .map(Clan::getName).get())
-                  .replace("%clan_leader%", getClanManager().getClanByPlayer(p)
-                    .map(Clan::getLeader)
-                    .map(OfflinePlayer::getName)
-                    .get())
-                  .replace("%clan_member_count%", getClanManager().getClanByPlayer(p)
-                    .map(c -> String.valueOf(c.getMembers().size()))
-                    .get())
-                ));
+//              scoreboard.addUpdatableLine((p) ->
+//                Component.text(line
+//                  .replace("%clan_name%", getClanManager().getClanByPlayer(p)
+//                    .map(Clan::getName).get())
+//                  .replace("%clan_leader%", getClanManager().getClanByPlayer(p)
+//                    .map(Clan::getLeader)
+//                    .map(OfflinePlayer::getName)
+//                    .get())
+//                  .replace("%clan_member_count%", getClanManager().getClanByPlayer(p)
+//                    .map(c -> String.valueOf(c.getMembers().size()))
+//                    .get())
+//                ));
             } else {
               scoreboard.addLine(Component.text(line));
             }
@@ -108,13 +112,13 @@ public final class ClanPlugin extends JavaPlugin {
     }
 
     {
-      clanManager.get().load();
+//      clanManager.get().load();
     }
 
     // Tasks
-    Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
-      clanManager.get().save();
-    }, 20L * 10L, 20L * getConfig().getLong("auto-save-interval", 30L));
+//    Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+//      clanManager.get().save();
+//    }, 20L * 10L, 20L * getConfig().getLong("auto-save-interval", 30L));
   }
 
   @NotNull
@@ -125,10 +129,5 @@ public final class ClanPlugin extends JavaPlugin {
   @NotNull
   public ClanManager getClanManager() {
     return clanManager.get();
-  }
-
-  @NotNull
-  public File getClanDatafolder() {
-    return clanDatafolder.get();
   }
 }

@@ -1,5 +1,11 @@
 auto-save-interval: 120 # In seconds
 
+storage:
+  type: 'file' # Options: file, sqlite, mysql
+  url: 'mysql://localhost:3306/clans' # Only applicable to 'sqlite' and 'mysql'.
+  username: 'root' # Only applicable to 'mysql'
+  password: 'root' # Only applicable to 'mysql'
+
 sidebar:
   enabled: false
   title: '(SERVER NAME)'

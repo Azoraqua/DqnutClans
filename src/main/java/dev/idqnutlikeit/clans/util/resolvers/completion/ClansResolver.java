@@ -18,6 +18,6 @@ public final class ClansResolver implements CompletionResolver {
   @NotNull
   @Override
   public List<String> resolve(@NotNull Object input) {
-    return new ArrayList<>(plugin.getClanManager().getClanNames());
+    return new ArrayList<>(/* plugin.getClanManager().getClanNames() */);
   }
 }

@@ -14,8 +14,10 @@ public final class ClanResolver implements ParameterResolver {
   @NotNull
   @Override
   public TypeResult resolve(@NotNull Object argument) {
-    return plugin.getClanManager().getClanByName(String.valueOf(argument))
-      .map((c) -> new TypeResult(c, argument))
-      .orElseGet(() -> new TypeResult(null, argument));
+//    return plugin.getClanManager().getClanByName(String.valueOf(argument))
+//      .map((c) -> new TypeResult(c, argument))
+//      .orElseGet(() -> new TypeResult(null, argument));
+
+    return new TypeResult(null);
   }
 }

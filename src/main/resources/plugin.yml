@@ -12,6 +12,9 @@ libraries:
   - 'com.google.guava:guava:32.1.2-jre'
   - 'org.projectlombok:lombok:1.18.28'
   - 'org.apache.commons:commons-collections4:4.4'
+  - 'com.zaxxer:HikariCP:5.0.1'
+  - 'org.xerial:sqlite-jdbc:3.44.1.0'
+  - 'org.mariadb.jdbc:mariadb-java-client:3.3.2'
 
 permissions:
   ${base.name}.*:
