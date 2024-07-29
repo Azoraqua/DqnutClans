@@ -29,9 +29,9 @@ public class Clan {
   @NotNull
   private final UUID id;
   @NotNull
-  private final String name;
+  private String name;
   @NotNull
-  private final OfflinePlayer leader;
+  private OfflinePlayer leader;
   @Singular
   @NotNull
   private final Set<OfflinePlayer> members = new HashSet<>();
@@ -77,6 +77,10 @@ public class Clan {
   public boolean isBanned(@NotNull OfflinePlayer player) {
     return bannedMembers.contains(player);
   }
+
+  public void setName(@NotNull String name) {this.name = name; }
+
+  public void setLeader(@NotNull Player newLeader) {this.leader = newLeader;}
 
   @NotNull
   public Collection<OfflinePlayer> getBannedMembers() {

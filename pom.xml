@@ -6,7 +6,7 @@
 
   <groupId>dev.idqnutlikeit</groupId>
   <artifactId>DqnutClans</artifactId>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.2-SNAPSHOT</version>
 
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
@@ -122,7 +122,7 @@
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
-      <version>1.20.1-R0.1-SNAPSHOT</version>
+      <version>1.21-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
     </dependency>
 

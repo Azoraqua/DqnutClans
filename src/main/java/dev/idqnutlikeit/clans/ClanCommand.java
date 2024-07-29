@@ -19,6 +19,7 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,6 +48,10 @@ public final class ClanCommand extends CommandBase {
         .append(Component.text("Clan Commands:"))
         .appendNewline()
         .append(Component.text("Create §b<name>§e").clickEvent(ClickEvent.suggestCommand("/clan create")))
+        .appendNewline()
+        .append(Component.text("Rename §b<name>§e").clickEvent(ClickEvent.suggestCommand("/clan rename")))
+        .appendNewline()
+        .append(Component.text("Setleader §b<player>§e").clickEvent(ClickEvent.suggestCommand("/clan setleader")))
         .appendNewline()
         .append(Component.text("Disband§e").clickEvent(ClickEvent.suggestCommand("/clan disband")))
         .appendNewline()
@@ -107,6 +112,76 @@ public final class ClanCommand extends CommandBase {
     clanManager.save();
 
     MessageUtils.send(sender, "Clan " + clan.getName() + " created with you as the leader.");
+  }
+
+  @SubCommand("rename")
+  @Permission("${base.name}.rename")
+  @WrongUsage("§cYou must provide a new name to rename a clan.")
+  public void rename(@NotNull CommandSender sender, @NotNull String newName) {
+    if (!(sender instanceof Player leader)) {
+      MessageUtils.send(sender, "Only players can rename clans.");
+      return;
+    }
+
+    if (!clanManager.hasClan(leader)) {
+      MessageUtils.send(sender, "You are not in a clan.");
+      return;
+    }
+
+    Clan clan = clanManager.getClanByPlayer(leader).orElse(null);
+    if (clan == null) {
+      MessageUtils.send(sender, "Could not retrieve your clan information.");
+      return;
+    }
+
+    if (!clan.getLeader().equals(leader)) {
+      MessageUtils.send(sender, "Only the clan leader can rename the clan.");
+      return;
+    }
+
+    boolean renamed = clanManager.renameClan(clan, newName);
+    if (!renamed) {
+      MessageUtils.send(sender, "A clan with that name already exists.");
+      return;
+    }
+
+    MessageUtils.send(sender, "Your clan has been renamed to " + newName + ".");
+  }
+
+  @SubCommand("setleader")
+  @Permission("${base.name}.setleader")
+  @WrongUsage("§cYou must specify a player to transfer ownership to.")
+  public void transferOwnership(@NotNull CommandSender sender, @NotNull Player newLeader) {
+    if (!(sender instanceof Player currentLeader)) {
+      MessageUtils.send(sender, "Only players can transfer ownership.");
+      return;
+    }
+
+    java.util.@NotNull Optional<Clan> optionalClan = clanManager.getClanByPlayer(currentLeader);
+
+    if (optionalClan.isEmpty()) {
+      MessageUtils.send(sender, "You are not in a clan.");
+      return;
+    }
+
+    Clan clan = optionalClan.get();
+
+    if (!clan.getLeader().equals(currentLeader)) {
+      MessageUtils.send(sender, "Only the clan leader can transfer ownership.");
+      return;
+    }
+
+    if (newLeader.equals(currentLeader)) {
+      MessageUtils.send(sender, "You cannot transfer ownership to yourself.");
+      return;
+    }
+
+    boolean success = clanManager.transferOwnership(clan, newLeader);
+    if (success) {
+      MessageUtils.send(sender, "Ownership of the clan has been transferred to " + newLeader.getName() + ".");
+    } else {
+      MessageUtils.send(sender, "Failed to transfer ownership. The specified player must be a member of the clan.");
+    }
   }
 
   @SubCommand("disband")

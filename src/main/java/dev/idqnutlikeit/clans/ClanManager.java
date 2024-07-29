@@ -43,6 +43,7 @@ public final class ClanManager {
 
     clans.add(clan);
     return clan;
+
   }
 
   @SneakyThrows
@@ -94,6 +95,26 @@ public final class ClanManager {
 
   public boolean hasClan(@NotNull OfflinePlayer player) {
     return hasClan(player, null);
+  }
+
+  public synchronized boolean renameClan(@NotNull Clan clan, @NotNull String newName) {
+    if (getClanByName(newName).isPresent()) {
+      return false;
+    }
+
+    clan.setName(newName);
+    save();
+    return true;
+  }
+
+  public synchronized boolean transferOwnership(@NotNull Clan clan, @NotNull Player newLeader) {
+    if (!clan.getMembers().contains(newLeader) && !clan.getLeader().equals(newLeader)) {
+      return false;
+    }
+
+    clan.setLeader(newLeader);
+    save();
+    return true;
   }
 
   public void addInvitation(OfflinePlayer player, Clan clan) {
